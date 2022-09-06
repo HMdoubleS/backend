@@ -3,8 +3,10 @@ const router = express.Router();
 
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
+const postValidation = require('../middleware/validation/postValidation');
 
 const postCtrl = require('../controllers/postController');
+
 
 // test route
 router.get('/', function(req, res, next) {
@@ -12,8 +14,8 @@ router.get('/', function(req, res, next) {
 });
 
 // routes
-router.get('/', auth, postCtrl.getAllPosts);
-router.post('/', auth, multer, postCtrl.addPost);
+router.get('/', auth, postValidation, postCtrl.getAllPosts);
+router.post('/', auth, multer,  postValidation ,postCtrl.addPost);
 
 // postman routes
 // router.get('/', postCtrl.getAllPosts);

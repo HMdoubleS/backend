@@ -1,19 +1,33 @@
-const fs = require('fs');
+// const fs = require('fs');
 const pool = require('../models/pool');
 
+// TODO: does there have to be a create table/ drop table query??
 // get all posts
 exports.getAllPosts = (req, res, next) => {
-    pool.query(`SELECT * FROM posts`)
+  pool.find().then(
+    (posts) => {
+      res.status(200).json(posts);
+    }
+  ).catch(
+    (error) => {
+      res.status(400).json({
+        error: error
+      });
+    }
+  );
+  pool.query(`SELECT * FROM posts`)
 };
 
 // CREATE a post
 exports.addPost = (req, res, next) => {
-
+    if(typeof req.body.post === "string"){
+      req.body.post = JSON.parse(req.body.post)
+    };
     const url = req.protocol + '://' + req.get('host');
     const post = {
       postId: req.body.post.postId,
       title: req.body.post.title,
-      author: req.body.post.firstName,
+      author: req.body.post.userName,
       postText: req.body.post.postText,
       imageUrl: url + '/images/' + req.file.filename,
       userId: req.body.post.userId
@@ -26,7 +40,13 @@ exports.addPost = (req, res, next) => {
             throw error
         }
         res.status(201).send('Post created successfully!');
-    })
+    }) .catch (
+      (error) => {
+        res.status(400).json({
+          error: error
+        });
+      }
+    );
   };
   
   
