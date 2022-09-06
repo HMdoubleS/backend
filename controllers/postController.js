@@ -48,24 +48,49 @@ exports.addPost = (req, res, next) => {
       }
     );
   };
-  
-  
-//   exports.getOneSauce = (req, res, next) => {
-//     Sauce.findOne({
-//       _id: req.params.id
-//     }).then(
-//       (sauce) => {
-//         res.status(200).json(sauce);
-//       }
-//     ).catch(
-//       (error) => {
-//         res.status(404).json({
-//           error: error
-//         });
-//       }
-//     );
-//   };
-  
+ 
+// getting one post 
+// TODO: not sure if this works in this instance or if the query is written correctly
+exports.getOnePost = (req, res, next) => {
+  post.findOne({
+    postId: req.params.id
+  }).then(
+    (post) => {
+      res.status(200).json(post);
+    }
+  ).catch(
+    (error) => {
+      res.status(404).json({
+        error: error
+      });
+    }
+  );
+
+  pool.query(`SELECT postID FROM posts, WHERE post.postID = post.postID`,
+  [post.postId], (error, results) => {
+      if (error) {
+          throw error
+      }
+      res.status(201).send('Post created successfully!');
+  }) .catch (
+    (error) => {
+      res.status(400).json({
+        error: error
+      });
+    }
+  );
+};
+
+// MODIFY post 
+exports.modifyPost = (req, res, next) => {
+
+}; 
+
+// DELETE post
+exports.deletePost = (req, res, next) => {
+
+};
+
 //   // used code from delete in order to delete the old image - check for owner of the sauce
 //   exports.modifySauce = (req, res, next) => {
 //     let sauce = new Sauce({_id: req.params._id});
@@ -157,79 +182,3 @@ exports.addPost = (req, res, next) => {
 //       }
 //     );
 //   };
-  
-//   exports.getAllSauces = (req, res, next) => {
-//     // console.log('I am here');
-//     Sauce.find().then(
-//       (sauces) => {
-//         res.status(200).json(sauces);
-//       }
-//     ).catch(
-//       (error) => {
-//         res.status(400).json({
-//           error: error
-//         });
-//       }
-//    );
-//   };
-  
-  
-//   // find one sauce
-//   // use a conditional to show which rating has been clicked - will assign a number (1, -1, 0)
-//   exports.getRating = (req, res, next) => {
-//     Sauce.findOne({_id: req.params.id}).then( // front end sends id
-//       (sauce) => { // data from the server - record
-//         // update object
-//         const sauceRatingUpdate = {
-//           likes: sauce.likes,
-//           dislikes: sauce.dislikes,
-//           usersLiked: sauce.usersLiked,
-//           usersDisliked: sauce.usersDisliked
-//         }
-//         console.log(sauce);
-  
-//         // if likes are 1 then add user to usersLiked array if it does not include the user
-//         if (req.body.like === 1) {
-//           console.log(req.body.userId)
-//           if(!sauceRatingUpdate.usersLiked.includes(req.body.userId)) { 
-//             sauceRatingUpdate.usersLiked.push(req.body.userId)
-//             sauceRatingUpdate.likes += 1
-//             console.log(sauceRatingUpdate)
-//           }
-//         // if likes are -1, then add the user to the usersDisliked array
-//         } else if (req.body.like === -1) {
-//           console.log(sauceRatingUpdate)
-//           if(!sauceRatingUpdate.usersDisliked.includes(req.body.userId)) { 
-//             sauceRatingUpdate.usersDisliked.push(req.body.userId)
-//             sauceRatingUpdate.dislikes += 1
-//             console.log(sauceRatingUpdate)
-//           }
-  
-//         } else if (req.body.likes === 0 && sauce.usersLiked.some(userId => userId === req.body.userId)) {
-//           const index = sauce.usersLiked.findIndex(userId => userId === req.body.userId)
-//           sauceRatingUpdate.usersLiked.splice(index, 1)
-//           sauceRatingUpdate.likes = sauceRatingUpdate.usersLiked.length
-  
-//         } else if (req.body.dislikes === 0 && sauce.usersDisliked.some(userId => userId === req.body.userId)) {
-//           const index = sauce.usersDisliked.findIndex(userId => userId === req.body.userId)
-//           sauceRatingUpdate.usersDisliked.splice(index, 1)
-//           sauceRatingUpdate.dilikes = sauceRatingUpdate.usersDisliked.length
-  
-//         }
-  
-//     // updating the sauce update object
-//     Sauce.updateOne({_id: req.params.id}, sauceRatingUpdate)
-//     .then(() => {
-//         res.status(201).json({
-//           message: 'Sauce updated successfully!'
-//         });
-//       }
-//     ).catch(
-//       (error) => {
-//         res.status(400).json({
-//           error: error
-//         });
-//       }
-//     )
-//    }
-//   )}
