@@ -3,6 +3,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');  
 const helmet = require('helmet'); 
+const bodyParser = require('body-parser');
 
 const postRoutes = require('./routes/postRoutes');
 // const userRoutes = require('./routes/userRoutes');
@@ -16,6 +17,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+app.use(bodyParser.json());
 
 helmet({
     crossOriginResourcePolicy: false,

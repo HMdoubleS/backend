@@ -21,7 +21,7 @@ exports.addComment = (req, res, next) => {
           if (error) {
               throw error
           }
-          res.status(201).send('Comment created successfully!');
+          res.status(201).json('Comment created successfully!');
       }) .catch (
         (error) => {
           res.status(400).json({

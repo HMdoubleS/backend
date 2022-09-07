@@ -3,20 +3,20 @@ const pool = require('../models/pool');
 
 // TODO: does there have to be a create table/ drop table query??
 // get all posts
-exports.getAllPosts = (req, res, next) => {
-  pool.find().then(
-    (posts) => {
-      res.status(200).json(posts);
-    }
-  ).catch(
-    (error) => {
-      res.status(400).json({
-        error: error
-      });
-    }
-  );
-  pool.query(`SELECT * FROM posts`)
-};
+// exports.getAllPosts = (req, res, next) => {
+//   pool.find().then( // what do I use instead of find??
+//     (posts) => {
+//       res.status(200).json(posts);
+//     }
+//   ).catch(
+//     (error) => {
+//       res.status(400).json({
+//         error: error
+//       });
+//     }
+//   );
+//   pool.query(`SELECT * FROM posts`)
+// };
 
 // CREATE a post
 exports.addPost = (req, res, next) => {
@@ -51,35 +51,35 @@ exports.addPost = (req, res, next) => {
  
 // getting one post 
 // TODO: not sure if this works in this instance or if the query is written correctly
-exports.getOnePost = (req, res, next) => {
-  post.findOne({
-    postId: req.params.id
-  }).then(
-    (post) => {
-      res.status(200).json(post);
-    }
-  ).catch(
-    (error) => {
-      res.status(404).json({
-        error: error
-      });
-    }
-  );
+// exports.getOnePost = (req, res, next) => {
+//   post.findOne({
+//     postId: req.params.id
+//   }).then(
+//     (post) => {
+//       res.status(200).json(post);
+//     }
+//   ).catch(
+//     (error) => {
+//       res.status(404).json({
+//         error: error
+//       });
+//     }
+//   );
 
-  pool.query(`SELECT postID FROM posts, WHERE post.postID = post.postID`,
-  [post.postId], (error, results) => {
-      if (error) {
-          throw error
-      }
-      res.status(201).send('Post created successfully!');
-  }) .catch (
-    (error) => {
-      res.status(400).json({
-        error: error
-      });
-    }
-  );
-};
+//   pool.query(`SELECT postID FROM posts, WHERE post.postID = $1`,
+//   [post.postId], (error, results) => {
+//       if (error) {
+//           throw error
+//       }
+//       res.status(201).json('Post created successfully!');
+//   }) .catch (
+//     (error) => {
+//       res.status(400).json({
+//         error: error
+//       });
+//     }
+//   );
+// };
 
 // MODIFY post 
 exports.modifyPost = (req, res, next) => {
