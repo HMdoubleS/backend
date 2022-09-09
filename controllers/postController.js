@@ -20,34 +20,40 @@ const pool = require('../models/pool');
 
 // CREATE a post
 exports.addPost = (req, res, next) => {
+  console.log(req.body);
     if(typeof req.body.post === "string"){
       req.body.post = JSON.parse(req.body.post)
-    };
+    } else {
+      req.body.post = req.body.post };
+
     const url = req.protocol + '://' + req.get('host');
+
     const post = {
-      postId: req.body.post.postId,
-      title: req.body.post.title,
-      author: req.body.post.userName,
-      postText: req.body.post.postText,
+      postId: req.body.postId,
+      title: req.body.title,
+      author: req.body.userName,
+      postText: req.body.postText,
       imageUrl: url + '/images/' + req.file.filename,
-      userId: req.body.post.userId
+      userId: req.body.userId
     };
-    console.log(post);
-    
+
+    pool.query(`CREATE TABLE IF NOT EXISTS posts(
+      postId SERIAL PRIMARY KEY,
+      title VARCHAR NOT NULL,
+      author VARCHAR NOT NULL,
+      postText VARCHAR NOT NULL,
+      imageUrl BINARYs,
+      userId INT NOT NULL 
+    )`);
     pool.query(`INSERT INTO posts(postId, title, author, postText, imageUrl, userId) VALUES ($1, $2, $3, $4, $5, $6)`,
     [post.postId, post.title, post.author, post.postText, post.imageUrl, post.userId], (error, results) => {
         if (error) {
             throw error
         }
-        res.status(201).send('Post created successfully!');
-    }) .catch (
-      (error) => {
-        res.status(400).json({
-          error: error
-        });
-      }
-    );
-  };
+        res.status(201).json('Post created successfully!');
+    }
+  );
+};
  
 // getting one post 
 // TODO: not sure if this works in this instance or if the query is written correctly
