@@ -3,6 +3,7 @@ const pool = require('../models/pool');
 
 // CREATE a comment
 exports.addComment = (req, res, next) => {
+
       const comment = {
         commentId: req.body.comment.commentId,
         author: req.body.comment.userName,

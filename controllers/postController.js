@@ -1,5 +1,6 @@
 // const fs = require('fs');
 const pool = require('../models/pool');
+const user = require('../middleware/auth');
 
 // TODO: does there have to be a create table/ drop table query??
 // get all posts
@@ -21,38 +22,53 @@ const pool = require('../models/pool');
 // CREATE a post
 exports.addPost = (req, res, next) => {
   console.log(req.body);
-    if(typeof req.body.post === "string"){
-      req.body.post = JSON.parse(req.body.post)
-    } else {
-      req.body.post = req.body.post };
-
+    if(req.file){
+      req.body.post = req.body.post;
+    
     const url = req.protocol + '://' + req.get('host');
 
     const post = {
-      postId: req.body.postId,
+      // postId: req.body.postId,
       title: req.body.title,
       author: req.body.userName,
       postText: req.body.postText,
-      imageUrl: url + '/images/' + req.file.filename,
-      userId: req.body.userId
+      image: url + '/images/' + req.file.filename
     };
 
-    pool.query(`CREATE TABLE IF NOT EXISTS posts(
-      postId SERIAL PRIMARY KEY,
-      title VARCHAR NOT NULL,
-      author VARCHAR NOT NULL,
-      postText VARCHAR NOT NULL,
-      imageUrl BINARYs,
-      userId INT NOT NULL 
-    )`);
-    pool.query(`INSERT INTO posts(postId, title, author, postText, imageUrl, userId) VALUES ($1, $2, $3, $4, $5, $6)`,
-    [post.postId, post.title, post.author, post.postText, post.imageUrl, post.userId], (error, results) => {
-        if (error) {
-            throw error
-        }
-        res.status(201).json('Post created successfully!');
-    }
-  );
+    // pool.query(`SELECT * FROM users WHERE userId = $1`
+    //   [req.auth.userId],
+    //   (error, user) => {
+    //     if (error) {
+    //       return res.status(401).json({
+    //         error: error
+    //       });
+    //     }
+    //   });
+
+      // pool.query(`CREATE TABLE IF NOT EXISTS posts(
+      //   postId SERIAL PRIMARY KEY,
+      //   title VARCHAR NOT NULL,
+      //   author VARCHAR NOT NULL,
+      //   postText VARCHAR NOT NULL,
+      //   image BINARY,
+      //   userId INT NOT NULL 
+      // )`);
+      pool.query(`CREATE TABLE IF NOT EXISTS posts(
+        title VARCHAR NOT NULL,
+        author VARCHAR NOT NULL,
+        postText VARCHAR NOT NULL,
+        image BINARY
+      )`);
+
+      pool.query(`INSERT INTO posts(title, author, text, image) VALUES ($1, $2, $3, ARRAY[$4])`,
+      [req.body.post.title, req.body.post.author, post.postText, post.image], (error, results) => {
+          if (error) {
+              throw error
+          }
+          res.status(201).json('Post created successfully!');
+      }
+    );
+  }
 };
  
 // getting one post 
