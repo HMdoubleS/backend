@@ -2,7 +2,7 @@
 const pool = require('../models/pool');
 const user = require('../middleware/auth');
 
-// TODO: does there have to be a create table/ drop table query??
+
 // get all posts
 // exports.getAllPosts = (req, res, next) => {
 //   pool.find().then( // what do I use instead of find??
@@ -28,40 +28,16 @@ exports.addPost = (req, res, next) => {
     const url = req.protocol + '://' + req.get('host');
 
     const post = {
-      // postId: req.body.postId,
-      title: req.body.title,
+      postId: req.body.postId,
       author: req.body.userName,
       postText: req.body.postText,
-      image: url + '/images/' + req.file.filename
+      media: url + '/images/' + req.file.filename,
+      userId: req.body.userId
     };
 
-    // pool.query(`SELECT * FROM users WHERE userId = $1`
-    //   [req.auth.userId],
-    //   (error, user) => {
-    //     if (error) {
-    //       return res.status(401).json({
-    //         error: error
-    //       });
-    //     }
-    //   });
 
-      // pool.query(`CREATE TABLE IF NOT EXISTS posts(
-      //   postId SERIAL PRIMARY KEY,
-      //   title VARCHAR NOT NULL,
-      //   author VARCHAR NOT NULL,
-      //   postText VARCHAR NOT NULL,
-      //   image BINARY,
-      //   userId INT NOT NULL 
-      // )`);
-      pool.query(`CREATE TABLE IF NOT EXISTS posts(
-        title VARCHAR NOT NULL,
-        author VARCHAR NOT NULL,
-        postText VARCHAR NOT NULL,
-        image BINARY
-      )`);
-
-      pool.query(`INSERT INTO posts(title, author, text, image) VALUES ($1, $2, $3, ARRAY[$4])`,
-      [req.body.post.title, req.body.post.author, post.postText, post.image], (error, results) => {
+      pool.query(`INSERT INTO posts(title, author, text, media) VALUES ($1, $2, ARRAY[$3])`,
+      [req.body.post.author, post.postText, post.media], (error, results) => {
           if (error) {
               throw error
           }

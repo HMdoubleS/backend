@@ -5,15 +5,16 @@ const pool = require('../models/pool');
 exports.addComment = (req, res, next) => {
 
       const comment = {
+        postId: req.body.comment.postID,
         commentId: req.body.comment.commentId,
         author: req.body.comment.userName,
-        postText: req.body.comment.commentText,
+        commentText: req.body.comment.commentText,
         userId: req.body.comment.userId
       };
       console.log(comment);
       
-      pool.query(`INSERT INTO comments(commentId, author, commentText, userId) VALUES ($1, $2, $3, $4, $5)`,
-      [comment.commentId, comment.author, comment.commentText, comment.userId], (error, results) => {
+      pool.query(`INSERT INTO comments(postId, commentId, author, commentText, userId) VALUES ($1, $2, $3, $4, $5)`,
+      [comment.postId, comment.commentId, comment.author, comment.commentText, comment.userId], (error, results) => {
           if (error) {
               throw error
           }
