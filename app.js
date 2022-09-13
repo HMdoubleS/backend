@@ -3,23 +3,17 @@ const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');  
 const helmet = require('helmet'); 
-const bodyParser = require('body-parser');
-
 
 const postRoutes = require('./routes/postRoutes');
 const userRoutes = require('./routes/userRoutes');
 // const commentRoutes = require('./routes/commentRoutes');
 
-
 dotenv.config();
 const app = express();
-
 
 app.use(express.json());
 app.use(cors());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
-app.use(bodyParser.json());
-// app.use(bodyparser.urlencoded({extended:true}));
 
 helmet({
     crossOriginResourcePolicy: false,
@@ -32,7 +26,6 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     next();
 });
-
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/posts', postRoutes);

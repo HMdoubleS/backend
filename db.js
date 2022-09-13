@@ -20,7 +20,11 @@ const createTables = () => {
     const userTable = 
     `CREATE TABLE IF NOT EXISTS users(
         userId SERIAL PRIMARY KEY NOT NULL,
-        userName VARCHAR NOT NULL
+        firstName VARCHAR NOT NULL,
+        lastName VARCHAR NOT NULL,
+        email VARCHAR NOT NULL,
+        password VARCHAR NOT NULL,
+        UNIQUE (email)
     )`
     pool.query(userTable)
     .then((res) => {

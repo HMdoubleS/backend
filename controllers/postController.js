@@ -1,51 +1,64 @@
 // const fs = require('fs');
 const pool = require('../models/pool');
-const user = require('../middleware/auth');
+const { post } = require('../routes/postRoutes');
+// const user = require('../middleware/auth');
 
 
 // get all posts
-// exports.getAllPosts = (req, res, next) => {
-//   pool.find().then( // what do I use instead of find??
-//     (posts) => {
-//       res.status(200).json(posts);
-//     }
-//   ).catch(
-//     (error) => {
-//       res.status(400).json({
-//         error: error
-//       });
-//     }
-//   );
-//   pool.query(`SELECT * FROM posts`)
-// };
+exports.getAllPosts = (req, res, next) => {
+  pool.query(`SELECT * FROM posts ORDER BY creationDate DESC`,
+  (error, posts) => {
+    if (error) {
+      return res.status(400).json({
+        error: error
+      });
+    }
+  })
+};
 
 // CREATE a post
 exports.addPost = (req, res, next) => {
-  console.log(req.body);
-    if(req.file){
-      req.body.post = req.body.post;
-    
-    const url = req.protocol + '://' + req.get('host');
-
-    const post = {
-      postId: req.body.postId,
-      author: req.body.userName,
-      postText: req.body.postText,
-      media: url + '/images/' + req.file.filename,
-      userId: req.body.userId
-    };
-
-
-      pool.query(`INSERT INTO posts(title, author, text, media) VALUES ($1, $2, ARRAY[$3])`,
-      [req.body.post.author, post.postText, post.media], (error, results) => {
-          if (error) {
-              throw error
-          }
-          res.status(201).json('Post created successfully!');
-      }
-    );
+  if(typeof req.body.post === "string"){
+    req.body.post = JSON.parse(req.body.post)
+  } else {
+  req.body.post = req.body.post }
+  const url = req.protocol + '://' + req.get('host');
+  const post = {
+    postId: req.body.postId,
+    title: req.body.post.title,
+    author: req.body.post.firstName,
+    postText: req.body.post.postText,
+    media: url + '/images/' + req.file.filename,
+    userId: req.body.userId
   }
+
+
 };
+
+
+
+  // console.log(req.body);
+  //   if(req.file){
+  //     req.body.post = req.body.post;
+    
+  //   const url = req.protocol + '://' + req.get('host');
+
+  //   const post = {
+  //     postId: req.body.postId,
+  //     author: req.body.userName,
+  //     postText: req.body.postText,
+  //     media: url + '/images/' + req.file.filename,
+  //     userId: req.body.userId
+  //   };
+  //   pool.query(`INSERT INTO posts(title, author, text, media) VALUES ($1, $2, ARRAY[$3])`,
+  //   [req.body.post.author, post.postText, post.media], (error, results) => {
+  //       if (error) {
+  //           throw error
+  //       }
+  //       res.status(201).json('Post created successfully!');
+  //   });
+  // }
+// };
  
 // getting one post 
 // TODO: not sure if this works in this instance or if the query is written correctly
