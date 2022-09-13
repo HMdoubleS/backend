@@ -18,79 +18,81 @@ exports.getAllPosts = (req, res, next) => {
 
 // CREATE a post
 exports.addPost = (req, res, next) => {
-  if(typeof req.body.post === "string"){
+  if(req.file) {
     req.body.post = JSON.parse(req.body.post)
-  } else {
-  req.body.post = req.body.post }
+
   const url = req.protocol + '://' + req.get('host');
+  
   const post = {
     postId: req.body.postId,
-    title: req.body.post.title,
-    author: req.body.post.firstName,
-    postText: req.body.post.postText,
-    media: url + '/images/' + req.file.filename,
+    title: req.body.title,
+    author: req.body.author,
+    postText: req.body.postText,
+    image: url + '/images/' + req.file.filename,
     userId: req.body.userId
   }
+  console.log(post)
 
+  // pool.query(`SELECT * FROM users WHERE userid = $1`,
+  // [req.auth.userId],
+  // (error, user) => {
+  //   if (error) {
+  //     return res.status(400).json({
+  //       error: error
+  //     });
+  //   }
+    pool.query(`INSERT INTO posts(postid, title, author, posttext, image, userid, creationdate) 
+      VALUES ($1, $2, $3, $4, $5, $6, NOW()::timestamp)`,
+      [post.postId, req.body.title, req.body.author, req.body.postText, req.body.image, req.body.userId],
+      (error) => {
+        if (error) {
+          res.status(400).json({
+            error: error
+          });
+        }
+      }
+    );
+  // })
+  } else {
+    const post = {
+      postId: req.body.postId,
+      title: req.body.title,
+      author: req.body.author,
+      postText: req.body.postText,
+      userId: req.body.userId
+    }
+    console.log(post)
 
+    pool.query(`INSERT INTO posts(postid, title, author, posttext, userid, creationdate) 
+      VALUES ($1, $2, $3, $4, $5, NOW()::timestamp)`,
+      [post.postId, req.body.title, req.body.author, req.body.postText, req.body.userId],
+      (error) => {
+        if (error) {
+          res.status(400).json({
+            error: error
+          });
+        }
+      }
+    );
+  }
+}
+
+// get one post
+// TODO: need to be able to get comments attached to post as well
+exports.getOnePost = (req, res, next) => {
+  pool.query(`SELECT * FROM posts WHERE postid = $1`,
+  [req.params.id], 
+  (error, post) => {
+      if (error) {
+          return res.status(401).json({
+            error: error
+          })
+      }
+  })
 };
 
 
 
-  // console.log(req.body);
-  //   if(req.file){
-  //     req.body.post = req.body.post;
-    
-  //   const url = req.protocol + '://' + req.get('host');
-
-  //   const post = {
-  //     postId: req.body.postId,
-  //     author: req.body.userName,
-  //     postText: req.body.postText,
-  //     media: url + '/images/' + req.file.filename,
-  //     userId: req.body.userId
-  //   };
-  //   pool.query(`INSERT INTO posts(title, author, text, media) VALUES ($1, $2, ARRAY[$3])`,
-  //   [req.body.post.author, post.postText, post.media], (error, results) => {
-  //       if (error) {
-  //           throw error
-  //       }
-  //       res.status(201).json('Post created successfully!');
-  //   });
-  // }
-// };
- 
-// getting one post 
-// TODO: not sure if this works in this instance or if the query is written correctly
-// exports.getOnePost = (req, res, next) => {
-//   post.findOne({
-//     postId: req.params.id
-//   }).then(
-//     (post) => {
-//       res.status(200).json(post);
-//     }
-//   ).catch(
-//     (error) => {
-//       res.status(404).json({
-//         error: error
-//       });
-//     }
-//   );
-
-//   pool.query(`SELECT postID FROM posts, WHERE post.postID = $1`,
-//   [post.postId], (error, results) => {
-//       if (error) {
-//           throw error
-//       }
-//       res.status(201).json('Post created successfully!');
-//   }) .catch (
-//     (error) => {
-//       res.status(400).json({
-//         error: error
-//       });
-//     }
-//   );
-// };
 
 // MODIFY post 
 exports.modifyPost = (req, res, next) => {

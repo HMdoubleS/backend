@@ -40,9 +40,9 @@ const createTables = () => {
             title VARCHAR NOT NULL,
             author VARCHAR NOT NULL,
             postText VARCHAR NOT NULL,
-            media VARCHAR,
-            creationDate TIMESTAMP NOT NULL,
+            image VARCHAR,
             userId int NOT NULL,
+            creationDate TIMESTAMP NOT NULL,
             CONSTRAINT fk_user
                 FOREIGN KEY (userId)
                 REFERENCES users(userId)
