@@ -13,6 +13,7 @@ exports.getAllPosts = (req, res, next) => {
         error: error
       });
     }
+    console.log(posts.rows);
   })
 };
 
@@ -22,8 +23,7 @@ exports.addPost = (req, res, next) => {
     req.body.post = JSON.parse(req.body.post)
 
   const url = req.protocol + '://' + req.get('host');
-  const { postId, title, author, postText, image, userId } = req.body;
-  
+
   const post = {
     postId: req.body.postId,
     title: req.body.title,
@@ -56,7 +56,6 @@ exports.addPost = (req, res, next) => {
   );
   // })
   } else {
-    const { postId, title, author, postText, userId } = req.body;
     const post = {
       postId: req.body.postId,
       title: req.body.title,
@@ -64,7 +63,7 @@ exports.addPost = (req, res, next) => {
       postText: req.body.postText,
       userId: req.body.userId
     }
-    console.log(post)
+    // console.log(post.rows)
 
     pool.query(`INSERT INTO posts(postid, title, author, posttext, userid, creationdate) 
       VALUES ($1, $2, $3, $4, $5, NOW()::timestamp)`,
@@ -75,6 +74,7 @@ exports.addPost = (req, res, next) => {
             error: error
           });
         }
+        console.log(post.rows);
       }
     );
   }
@@ -84,17 +84,16 @@ exports.addPost = (req, res, next) => {
 // TODO: need to be able to get comments attached to post as well
 exports.getOnePost = (req, res, next) => {
   const id = req.params.id;
-  res.send(`post ${id}`);
 
-  pool.query(`SELECT * FROM posts WHERE postid = $1`,
-  [id], (error, post) => {
-      if (error) {
-          return res.status(401).json({
-            error: error
-          })
-      }
-      res.status(201).json(results.rows)
-  })
+  pool.query(`SELECT * FROM posts WHERE postid = $1`, [id], 
+  (error, posts) => {
+    if (error) {
+      return res.status(400).json({
+        error: error
+      });
+    }
+    console.log(posts.rows);
+  })  
 };
 
 
@@ -103,9 +102,46 @@ exports.getOnePost = (req, res, next) => {
 // MODIFY post 
 exports.modifyPost = (req, res, next) => {
 
+// TODO: need to get one post before it can be modified
+
+
 }; 
 
 // DELETE post
 exports.deletePost = (req, res, next) => {
+  const id = req.params.id;
 
+  pool.query(`SELECT * FROM posts WHERE postid = $1`, [id], 
+  (error, post) => {
+    if (error) {
+      return res.status(401).json({
+        error: error
+      });
+    }
+  }) 
+  if (post.rowCount === 0) {
+    console.log('Post does not exist');
+    return res.status(404).json('Post does not exist')
+  } else if (post.rowCount != 0) {
+    if (post.rows[0].userid === id) {
+      pool.query(`DELETE FROM posts WHERE postid = $1`, [id], 
+      (error) => {
+        if (error) {
+          throw error
+        }
+      })
+    }
+  } // need a condition if the media value does exist
+  if (post.rows[0].image != null){
+
+// TODO: in postgres the image column says null even when a post has an image
+
+
+
+
+
+  } else {
+    console.log('Unauthorized');
+    return res.status(400).json('Unauthorized');
+  }
 };

@@ -16,9 +16,9 @@ const postCtrl = require('../controllers/postController');
 // router.delete('/:id', auth, postValidation(postSchema), postCtrl.deletePost);
 
 // postman routes
-router.get('/posts', postCtrl.getAllPosts); // display main page
+router.get('/', postCtrl.getAllPosts); // display main page
 router.post('/', multer, postCtrl.addPost);
-router.get('/:id', postCtrl.getOnePost);
+router.get('/:id', postCtrl.getOnePost); // get error 22P02 in postman when trying to find one post
 router.put('/:id', multer, postCtrl.modifyPost);
 router.delete('/:id', postCtrl.deletePost);
 
