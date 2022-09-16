@@ -1,9 +1,13 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../models/pool');
-
+const signupSchema = require('../models/signupSchema');
+const signupValidation = require('../middleware/validation/signupValidation');
 
 exports.signup = (req, res, next) => {
+  if (signupValidation(signupSchema)) {
+    validData = true;
+  }
     bcrypt.hash(req.body.password, 10).then(
         (hash) => {
             const user = {
