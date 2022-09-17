@@ -101,6 +101,13 @@ exports.getOnePost = (req, res, next) => {
 
 // MODIFY post 
 exports.modifyPost = (req, res, next) => {
+  const id = req.params.id;
+  pool.query(`SELECT * FROM posts WHERE postid = $1`, [id],
+  
+  )
+
+
+
 
 // TODO: need to get one post before it can be modified
 
