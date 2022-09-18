@@ -1,8 +1,5 @@
 // const fs = require('fs');
 const pool = require('../models/pool');
-const { post } = require('../routes/postRoutes');
-// const user = require('../middleware/auth');
-
 
 // get all posts
 exports.getAllPosts = (req, res, next) => {

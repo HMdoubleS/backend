@@ -1,24 +1,16 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../models/pool');
-const signupSchema = require('../models/signupSchema');
-const signupValidation = require('../middleware/validation/signupValidation');
-
-
 
 // TODO: signup does not work in postman -- returns data and salt argumant required
 exports.signup = (req, res, next) => {
-  if (signupValidation(signupSchema)) {
-    validData = true;
-  }
-  const salt = bcrypt.genSalt(10).then(
-    bcrypt.hash(req.body.password, 10).then((hash) => {
+    bcrypt.hash(req.body.password, 10).then(
+      (hash) => {
         const user = {
-            userId: req.body.userId,
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
-            password: hash(req.body.password, salt),
+            password: hash,
         };
         console.log(user);
 
@@ -32,16 +24,16 @@ exports.signup = (req, res, next) => {
           if (userFound.rowCount != 0) {
             return res.status(401).json('Email already registered')
           } else {
-            pool.query(`INSERT INTO users(userId, firstName, lastName, email, password) VALUES ($1, $2, $3, $4, $5)`,
-            [user.userId, user.firstName, user.lastName, user.email, user.password], (error, res) => {
+            pool.query(`INSERT INTO users(firstName, lastName, email, password) VALUES ($1, $2, $3, $4)`,
+            [user.firstName, user.lastName, user.email, user.password], (error, res) => {
               if (error) {
                 throw error
               }
-              res.status(201).send('User created successfully!')
+              res.status(201).json('User created successfully!')
             }) 
           }
       })
-  }))
+  })
 };
 
 
