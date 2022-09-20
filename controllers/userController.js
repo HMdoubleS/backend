@@ -2,89 +2,75 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../models/pool');
 
-// TODO: signup does not work in postman -- returns data and salt argumant required
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10).then(
-      (hash) => {
-        const user = {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            password: hash,
-        };
-        console.log(user);
+  bcrypt.hash(req.body.password, 10).then((hash) => {
+    const user = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        password: hash,
+    };
+    console.log(user);
 
-        pool.query(`SELECT * FROM users WHERE email = $1`, [req.body.email],
-        (error, userFound) => {
+    pool.query(`SELECT * FROM users WHERE email = $1`, [req.body.email],
+    (error, userFound) => {
+      if (error) {
+        return res.status(401).json({
+          error: error
+        });
+      }
+      if (userFound.rowCount != 0) {
+        console.log('Email already registered');
+        return res.status(401).json('Already registered');
+      } else {
+        pool.query(`INSERT INTO users(firstName, lastName, email, password) VALUES ($1, $2, $3, $4) RETURNING *`,
+        [user.firstName, user.lastName, user.email, user.password], 
+        (error) => {
           if (error) {
-            return res.status(401).json({
-              error: error
-            });
+            throw error
           }
-          if (userFound.rowCount != 0) {
-            return res.status(401).json('Email already registered')
-          } else {
-            pool.query(`INSERT INTO users(firstName, lastName, email, password) VALUES ($1, $2, $3, $4)`,
-            [user.firstName, user.lastName, user.email, user.password], (error, res) => {
-              if (error) {
-                throw error
-              }
-              res.status(201).json('User created successfully!')
-            }) 
-          }
-      })
+          console.log('User has been registered')
+          return res.status(201).json('User registered successfully!')
+        }) 
+      }
+    })
   })
 };
 
-
-
-//TODO: finish this 
+// this throws a postgres error in postman
 exports.login = (req, res, next) => {
-    pool.query(`SELECT userId FROM users, WHERE user.userId = $1`,
+    pool.query(`SELECT * FROM users, WHERE email = $1`,
     [req.body.email],
     (error, user) => {
-        if (error) {
-            return res.status(401).json({
-                error: error,
-            });
-        }
-        if (!user) {
-            return res.status(401).json({
-                error: new Error('user not found')
-            });
-        }
-        bcrypt.compare(req.body.password, user.password).then(
-            (valid) => {
-              if (!valid) {
-                return res.status(401).json({
-                  error: new Error('Incorrect password!')
-                });
-              }
-              const token = jwt.sign(
-                { userId: user._id },
-                'RANDOM_TOKEN_SECRET',
-                { expiresIn: '24h' });
-              res.status(200).json({
-                userId: user._id,
-                token: token
-              });
-            }
-          ).catch(
-            (error) => {
-              res.status(500).json({
-                error: error
-              });
-            }
-          );
-        }
-      ).catch(
-        (error) => {
-          res.status(500).json({
-            error: error
+      if (error) {
+          return res.status(401).json({
+              error: error,
           });
-        }
-      );
-    };
+      }
+      if (user.rowCount == 0) {
+          return res.status(401).json('User is not valid');
+      }
+      if (user.rowCount != 0) {
+        bcrypt.compare(req.body.password, user.rows[0].password).then((valid) => {
+            if (!valid) {
+              return res.status(401).json('Incorrect password!');
+            }
+            const token = jwt.sign(
+              { userId: user.rows[0].userid },
+              'RANDOM_TOKEN_SECRET',
+              { expiresIn: '24h' });
+            res.status(200).json({
+              userId: user.rows[0].userid,
+              firstName: user.rowa[0].firstName,
+              lastName: user.rows[0].lastName,
+              token: token
+            });
+          }
+        )}
+    }
+  )
+};
+  
 
 // getting user profile
 exports.getOneUser = (req, res, next) => {

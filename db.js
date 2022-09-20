@@ -19,11 +19,12 @@ pool.on('connect', () => {
 const createTables = () => {
     const userTable = 
     `CREATE TABLE IF NOT EXISTS users(
-        userId uuid DEFAULT gen_random_uuid() PRIMARY KEY NOT NULL,
+        userId uuid DEFAULT gen_random_uuid(),
         firstName VARCHAR NOT NULL,
         lastName VARCHAR NOT NULL,
         email VARCHAR NOT NULL,
         password VARCHAR NOT NULL,
+        PRIMARY KEY (userId),
         UNIQUE (email)
     )`
     pool.query(userTable)
@@ -36,13 +37,14 @@ const createTables = () => {
     .then(() => {
         const postTable = 
         `CREATE TABLE IF NOT EXISTS posts(
-            postId uuid DEFAULT gen_random_uuid() PRIMARY KEY NOT NULL,
+            postId uuid DEFAULT gen_random_uuid(),
             title VARCHAR NOT NULL,
             author VARCHAR NOT NULL,
             postText VARCHAR NOT NULL,
             image VARCHAR,
             userId uuid NOT NULL,
             creationDate TIMESTAMP NOT NULL,
+            PRIMARY KEY (postId),
             CONSTRAINT fk_user
                 FOREIGN KEY (userId)
                 REFERENCES users(userId)
@@ -59,12 +61,13 @@ const createTables = () => {
     .then(() => {
         const commentTable = 
         `CREATE TABLE IF NOT EXISTS comment(
-            commentId uuid DEFAULT gen_random_uuid() PRIMARY KEY NOT NULL,
+            commentId uuid DEFAULT gen_random_uuid(),
             author VARCHAR NOT NULL,
             commentText VARCHAR NOT NULL,
             creationDate TIMESTAMP NOT NULL,
             postId uuid NOT NULL,
             userId uuid NOT NULL,
+            PRIMARY KEY (commentId),
             CONSTRAINT fk_user
                 FOREIGN KEY (userId)
                 REFERENCES users(userId)
