@@ -15,6 +15,7 @@ exports.signup = (req, res, next) => {
     pool.query(`SELECT * FROM users WHERE email = $1`, [req.body.email],
     (error, userFound) => {
       if (error) {
+        console.log(error)
         return res.status(401).json({
           error: error
         });
@@ -27,6 +28,7 @@ exports.signup = (req, res, next) => {
         [user.firstName, user.lastName, user.email, user.password], 
         (error) => {
           if (error) {
+            console.log(error)
             throw error
           }
           console.log('User has been registered')
@@ -39,10 +41,11 @@ exports.signup = (req, res, next) => {
 
 // this throws a postgres error in postman
 exports.login = (req, res, next) => {
-    pool.query(`SELECT * FROM users, WHERE email = $1`,
+    pool.query(`SELECT * FROM "users" WHERE email = $1`,
     [req.body.email],
     (error, user) => {
       if (error) {
+        console.log(error)
           return res.status(401).json({
               error: error,
           });
@@ -61,7 +64,7 @@ exports.login = (req, res, next) => {
               { expiresIn: '24h' });
             res.status(200).json({
               userId: user.rows[0].userid,
-              firstName: user.rowa[0].firstName,
+              firstName: user.rows[0].firstName,
               lastName: user.rows[0].lastName,
               token: token
             });

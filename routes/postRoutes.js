@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-// const auth = require('../middleware/auth');
+const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
-// const postValidation = require('../middleware/validation/postValidation');
-// const postSchema = require('../models/postSchema');
+const postValidation = require('../middleware/validation/postValidation');
+const postSchema = require('../models/postSchema');
 
 const postCtrl = require('../controllers/postController');
 

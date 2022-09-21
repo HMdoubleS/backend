@@ -43,7 +43,7 @@ const createTables = () => {
             postText VARCHAR NOT NULL,
             image VARCHAR,
             userId uuid NOT NULL,
-            creationDate TIMESTAMP NOT NULL,
+            creationDate DEFAULT CURRRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY (postId),
             CONSTRAINT fk_user
                 FOREIGN KEY (userId)
