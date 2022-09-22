@@ -12,7 +12,7 @@ exports.signup = (req, res, next) => {
     };
     console.log(user);
 
-    pool.query(`SELECT * FROM users WHERE email = $1`, [req.body.email],
+    pool.query(`SELECT * FROM "users" WHERE email = $1`, [req.body.email],
     (error, userFound) => {
       if (error) {
         console.log(error)
@@ -24,7 +24,7 @@ exports.signup = (req, res, next) => {
         console.log('Email already registered');
         return res.status(401).json('Already registered');
       } else {
-        pool.query(`INSERT INTO users(firstName, lastName, email, password) VALUES ($1, $2, $3, $4) RETURNING *`,
+        pool.query(`INSERT INTO "users"(firstName, lastName, email, password) VALUES ($1, $2, $3, $4) RETURNING *`,
         [user.firstName, user.lastName, user.email, user.password], 
         (error) => {
           if (error) {
