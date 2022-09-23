@@ -1,6 +1,7 @@
 // const fs = require('fs');
 const pool = require('../models/pool');
 
+
 // get ALL posts
 exports.getAllPosts = (req, res, next) => {
   pool.query(`SELECT * FROM "posts" ORDER BY creationDate DESC`,
@@ -9,8 +10,7 @@ exports.getAllPosts = (req, res, next) => {
       return res.status(400).json({
         error: error
       });
-    }
-    console.log(posts.rows);
+1    }
   })
 };
 
@@ -31,7 +31,6 @@ exports.addPost = (req, res, next) => {
       image: url + '/images/' + req.file.filename,
       userId: req.body.userId
     }
-    console.log(post)
 
     pool.query(
       `INSERT INTO "posts"(title, author, posttext, image, userId ) 
@@ -39,9 +38,8 @@ exports.addPost = (req, res, next) => {
       [post.title, post.author, post.postText, post.image, post.userId], 
       error => {
         if (error) {
-          console.log(error)
           res.status(400).json({
-            error: error
+          error: error
           })
         }
       }
@@ -53,7 +51,6 @@ exports.addPost = (req, res, next) => {
       postText: req.body.postText,
       userId: req.body.userId 
     }
-    console.log(post)
 
     pool.query(
       `INSERT INTO "posts"(title, author, posttext, userId)
@@ -61,7 +58,6 @@ exports.addPost = (req, res, next) => {
       [post.title, post.author, post.postText, post.userId], 
       error => {
         if (error) {
-          console.log(error)
           res.status(400).json({
             error: error
           })
@@ -73,45 +69,101 @@ exports.addPost = (req, res, next) => {
 
 
 // get one post
-// TODO: need to be able to get comments attached to post as well
 exports.getOnePost = (req, res, next) => {
-  const id = req.params.id;
-
-  pool.query(`SELECT * FROM "posts" WHERE postid = $1`, [id], 
-  (error, posts) => {
+  pool.query(`SELECT * FROM "posts" WHERE postId = $1`,
+  [req.params.id],
+  (error) => {
     if (error) {
-      console.log(posts.rows);
-      return res.status(400).json({
-        error: error
+      res.status(401).json({
+      error: error,
       });
-    } else {
-      pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`, [id],
-      (error, comments) => {
-        if (error) {
-          console.log(comments.rows);
-          return res.status(400).json({
-            error: error
-          });
-        }
-      })  
-    }
-  })
+    } 
+  });
+  // pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`, 
+  //   [req.params.id],
+  //   (error) => {
+  //     if (error) {
+  //       throw error
+  //     }
+  //   }
+  // ) 
 };
+
+
+
+  // pool.query(`SELECT * FROM "posts" WHERE postid = $1`, 
+  // [req.params.id], 
+  // (error) => {
+  //   if (error) {
+  //     return res.status(400).json({
+  //     error: error
+  //     });
+  //   } else {
+      // pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`, 
+      // [req.params.id],
+      // (error) => {
+      //   if (error) {
+      //     return res.status(400).json({
+      //     error: error
+      //     });
+      //   }
+      // }) 
+  //   }
+  // })
+
+
+
+
+
+
 
 // MODIFY post 
 exports.modifyPost = (req, res, next) => {
-  const id = req.params.id;
-  pool.query(`SELECT * FROM "posts" WHERE postid = $1`, [id],
+  pool.query(`SELECT * FROM "posts" WHERE postid = $1`, 
+  [req.params.id],
+  (error) => {
+    if (error) {
+      return res.status(401).json({
+      error: error,
+      });
+    }
+    if (post.rowCount === 0) {
+      console.log('Post does not exist')
+      res.status(401).json('Post does not exist');
+    } else if (post.rowCount != 0) {
+      if (req.file) {
+        const url = req.protocol + '://' + req.get('host');
+        req.body.post = JSON.parse(req.body.post);
+
+        if (post.rows[0].image != null) {
+        const filename = post.image.split('/images/')[1];
+        fs.unlink('images/' + filename, () => {
+         console.log('New image added');
+         console.log('Old image ' + filename + ' deleted');
+        });
+      }
+        const newPostData = {
+          title: req.body.title,
+          author: req.body.author,
+          postText: req.body.postText,
+          image: url + '/images/' + req.file.filename
+        }
+        pool.query(
+          `UPDATE "posts" SET title = $1, author = $2, postText = $3, image = $4`,
+          [newPostData.title, newPostData.author, newPostData.postText, newPostData.image], 
+          error => {
+            if (error) {
+              throw error
+            }
+          }
+        )
+      }
+    }
+  }
+)};
   
-  )
 
 
-
-
-// TODO: need to get one post before it can be modified
-
-
-}; 
 
 // DELETE post
 exports.deletePost = (req, res, next) => {
@@ -140,7 +192,6 @@ exports.deletePost = (req, res, next) => {
   } // need a condition if the media value does exist
   if (post.rows[0].image != null){
 
-// TODO: in postgres the image column says null even when a post has an image
 
   } else {
     console.log('Unauthorized');
