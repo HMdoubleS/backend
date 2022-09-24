@@ -17,8 +17,7 @@ exports.getAllPosts = (req, res, next) => {
 // CREATE a post
 exports.addPost = (req, res, next) => {
   let post;
-
-  // if there is a media upload
+  // if there is an image upload
   if (req.body.file) { 
     req.body.post = JSON.parse(req.body.post)
 
@@ -45,6 +44,7 @@ exports.addPost = (req, res, next) => {
       }
     )
   } else {
+    // no image upload
     post = {
       title: req.body.title,
       author: req.body.author,
@@ -69,6 +69,7 @@ exports.addPost = (req, res, next) => {
 
 
 // get one post
+// TODO: need to grab comments from shown post
 exports.getOnePost = (req, res, next) => {
   pool.query(`SELECT * FROM "posts" WHERE postId = $1`,
   [req.params.id],
@@ -79,45 +80,11 @@ exports.getOnePost = (req, res, next) => {
       });
     } 
   });
-  // pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`, 
-  //   [req.params.id],
-  //   (error) => {
-  //     if (error) {
-  //       throw error
-  //     }
-  //   }
-  // ) 
-};
-
-
-
-  // pool.query(`SELECT * FROM "posts" WHERE postid = $1`, 
-  // [req.params.id], 
-  // (error) => {
-  //   if (error) {
-  //     return res.status(400).json({
-  //     error: error
-  //     });
-  //   } else {
-      // pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`, 
-      // [req.params.id],
-      // (error) => {
-      //   if (error) {
-      //     return res.status(400).json({
-      //     error: error
-      //     });
-      //   }
-      // }) 
-  //   }
-  // })
-
-
-
-
-
+}; 
 
 
 // MODIFY post 
+// TODO: test in postman
 exports.modifyPost = (req, res, next) => {
   pool.query(`SELECT * FROM "posts" WHERE postid = $1`, 
   [req.params.id],
@@ -164,13 +131,12 @@ exports.modifyPost = (req, res, next) => {
   
 
 
-
 // DELETE post
+// TODO: test in postman
 exports.deletePost = (req, res, next) => {
-  const id = req.params.id;
-
-  pool.query(`SELECT * FROM "posts" WHERE postid = $1`, [id], 
-  (error, post) => {
+  pool.query(`SELECT * FROM "posts" WHERE postid = $1`, 
+  [req.params.id], 
+  (error) => {
     if (error) {
       return res.status(401).json({
         error: error
@@ -182,19 +148,21 @@ exports.deletePost = (req, res, next) => {
     return res.status(404).json('Post does not exist')
   } else if (post.rowCount != 0) {
     if (post.rows[0].userid === id) {
-      pool.query(`DELETE FROM posts WHERE postid = $1`, [id], 
+      pool.query(`DELETE FROM posts WHERE postid = $1`, 
+      [req.params.id], 
       (error) => {
         if (error) {
           throw error
         }
       })
+      // if image does exist
+      if (post.rows[0].image != null){
+        const filename = post.image.split('/images/')[1];
+          fs.unlink('images/' + filename, () => {});
+      } 
+      res.status(201).json('Image has been deleted');
     }
-  } // need a condition if the media value does exist
-  if (post.rows[0].image != null){
-
-
   } else {
-    console.log('Unauthorized');
-    return res.status(400).json('Unauthorized');
+    res.status(404).json('Unauthorized');
   }
 };

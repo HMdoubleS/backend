@@ -7,25 +7,25 @@ const postValidation = require('../middleware/validation/postValidation');
 
 const postCtrl = require('../controllers/postController');
 
-// // get all posts
+// get all posts
 // router.get('/',  function(req, res) {
 //     auth, postValidation, postCtrl.getAllPosts
 // });
-// // add/create post
+// add/create post
 // router.post('/',  function(req, res) {
 //     auth, multer, postValidation, postCtrl.addPost
 // });
-// // get one post
+// get one post
 // router.get('/:id', function(req, res) {
 //     auth, postValidation, postCtrl.getOnePost
 // });
-// // modify post
+// modify post
 // router.put('/:id', function(req, res) {
 //     auth, multer, postValidation, postCtrl.modifyPost
 // });
-// // delete post
+// delete post
 // router.delete('/:id', function(req, res) {
-//     auth, postValidation(postSchema), postCtrl.deletePost
+//     auth, postValidation, postCtrl.deletePost
 // });
 
 // postman routes
