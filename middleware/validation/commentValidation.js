@@ -1,10 +1,8 @@
 const yup = require('yup');
 
 const commentSchema = yup.object({
-
     author: yup.string().trim().required(),
     commentText: yup.string().min(10).max(300).required()
-
 });
 
 exports.commentValidation = async (req, res, next) => {

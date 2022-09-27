@@ -3,27 +3,31 @@ const pool = require('../models/pool');
 // CREATE a comment
 // TODO: test in postman
 exports.addComment = (req, res, next) => {
-  let comment;
-  
+  pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
+  [req.params.id],
+  (error) => {
+    if (error) {
+      throw error
+    } 
+  })
   comment = {
     author: req.body.author,
-    commentText: req.body.postText,
-    postId: req.body.userId,
-    userId: req.body.userId
+    commentText: req.body.commentText,
+    postId: req.body.postId,
+    userId: req.body.userId 
   }
 
-  pool.query(`INSERT INTO "comments"(author, commenttext, postId, userId)
-    VALUES ($1, $2, $3, $4)`,
-    [comment.author, comment.postText, comment.postId, comment.userId], 
-    error => {
-      if (error) {
-        res.status(400).json({
-          error: error
-        })
-      }
+  pool.query(`INSERT INTO "comment"(author, commenttext, postid, userid) VALUES ($1, $2, $3, $4)`,
+  [comment.author, comment.commentText, comment.postId, comment.userId], 
+  error => {
+    if (error) {
+      throw error
     }
-  )
+    console.log('Comment saved successfully')
+    return res.status(201).json('Comment saved successfully!');
+  })
 }
+
 
 // MODIFY a comment
 // TODO: test in postman

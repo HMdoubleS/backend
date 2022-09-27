@@ -29,9 +29,9 @@ const postCtrl = require('../controllers/postController');
 // });
 
 // postman routes
-router.get('/', postCtrl.getAllPosts); // display main page
+router.get('/', postCtrl.getAllPosts); 
 router.post('/', multer, postCtrl.addPost);
-router.get('/:id', postCtrl.getOnePost); // get error 22P02 in postman when trying to find one post
+router.get('/:id', postCtrl.getOnePost); 
 router.put('/:id', multer, postCtrl.modifyPost);
 router.delete('/:id', postCtrl.deletePost);
 
