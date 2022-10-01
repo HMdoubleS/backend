@@ -70,10 +70,7 @@ exports.addPost = (req, res, next) => {
 // TODO: need to grab comments from shown post
 exports.getOnePost = (req, res, next) => {
   const id = req.params.id;
-  // const postData = posts.rows;
-  // const commentData = comments.rows;
-  // const onePost = { postData, commentData };
-
+  
   pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
   [id],
   (error, posts) => {
@@ -81,37 +78,22 @@ exports.getOnePost = (req, res, next) => {
       res.status(401).json({
       error: error,
       });
-    }
-    console.log('one post')
-    res.status(201).send(posts.rows)
+    } 
+    console.log(posts.rows)
+
+    pool.query(`SELECT * FROM "comment" WHERE postid = $1 ORDER BY creationDate DESC`,
+    [id],
+    (error, comment) => {
+      if (error) {
+        res.status(401).json({
+        error: error,
+        });
+      } 
+      console.log(comment.rows)
+      res.status(201).send(posts.rows && comment.rows);
+    })
   })
 };
-
-
-
-  // pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
-  // [id],
-  // (error, posts) => {
-  //   if (error) {
-  //     res.status(401).json({
-  //     error: error,
-  //     });
-  //   } else {
-  //     pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`,
-  //     [id],
-  //     (error, comments) => {
-  //       if (error) {
-  //         res.status(401).json({
-  //         error: error,
-  //         })
-  //       }
-  //     })
-  //   }
-  // }) 
-  // }
-
-
-
 
 // MODIFY post 
 // TODO: test in postman

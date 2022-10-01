@@ -64,9 +64,9 @@ const createTables = () => {
             commentId uuid DEFAULT gen_random_uuid(),
             author VARCHAR NOT NULL,
             commentText VARCHAR NOT NULL,
-            creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             postId uuid NOT NULL,
             userId uuid NOT NULL,
+            creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY (commentId),
             CONSTRAINT fk_user
                 FOREIGN KEY (userId)
