@@ -37,6 +37,7 @@ exports.addPost = (req, res, next) => {
           error: error
           })
         }
+        console.log(req.body)
         console.log('Post saved successfully')
         res.status(201).json('Post saved successfully!');
       } 
@@ -79,16 +80,16 @@ exports.getOnePost = (req, res, next) => {
     } 
     console.log(posts.rows)
 
-    pool.query(`SELECT * FROM "comment" WHERE postid = $1 ORDER BY creationDate DESC`,
+    pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`,
     [id],
-    (error, comment) => {
+    (error, comments) => {
       if (error) {
         res.status(401).json({
         error: error,
         });
       } 
-      console.log(comment.rows)
-      res.status(201).send(posts.rows && comment.rows);
+      console.log(comments.rows)
+      res.status(201).send(posts.rows && comments.rows);
     })
   })
 };

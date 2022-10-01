@@ -60,10 +60,11 @@ const createTables = () => {
     })
     .then(() => {
         const commentTable = 
-        `CREATE TABLE IF NOT EXISTS comment(
+        `CREATE TABLE IF NOT EXISTS comments(
             commentId uuid DEFAULT gen_random_uuid(),
             author VARCHAR NOT NULL,
-            commentText VARCHAR NOT NULL,
+            comment VARCHAR NOT NULL,
+            image VARCHAR,
             postId uuid NOT NULL,
             userId uuid NOT NULL,
             creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

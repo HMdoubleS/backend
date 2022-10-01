@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const auth = require('../middleware/auth');
-const commentValidation = require('../middleware/validation/commentValidation');
+const multer = require('../middleware/multer-config');
+// const auth = require('../middleware/auth');
+// const commentValidation = require('../middleware/validation/commentValidation');
 
 const commentCtrl = require('../controllers/commentController');
 
@@ -21,8 +22,8 @@ const commentCtrl = require('../controllers/commentController');
 // });
 
 // postman routes
-router.post('/', commentCtrl.addComment);
-router.put('/:id', commentCtrl.modifyComment);
+router.post('/', multer, commentCtrl.addComment);
+router.put('/:id', multer, commentCtrl.modifyComment);
 router.delete('/:id', commentCtrl.deleteComment);
 
 module.exports = router;

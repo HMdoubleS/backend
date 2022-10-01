@@ -1,42 +1,61 @@
 const pool = require('../models/pool');
 
 // CREATE a comment
-// TODO: test in postman
 exports.addComment = (req, res, next) => {
-  console.log(req.body);
-  const id = req.params.id;
-  pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
-  [id],
-  (error ) => {
-    if (error) {
-      throw error
-    } 
-
+  let comment;
+  // if there is an image upload
+  if (req.file) { 
+    const url = req.protocol + '://' + req.get('host')
     comment = {
       author: req.body.author,
-      commentText: req.body.comment,
-      postId: req.body.postId,
+      comment: req.body.comment,
+      image: url + '/images/' + req.file.filename,
       userId: req.body.userId
     }
+    
+    pool.query(`INSERT INTO "comments"(author, comment, image, postId, userId ) VALUES ($1, $2, $3, $4, $5)`,
+      [comment.author, comment.postText, comment.image, comment.postId, comment.userId], 
+      error => {
+        if (error) {
+          res.status(400).json({
+          error: error
+          })
+        }
+        console.log(req.body)
+        console.log('Comment saved successfully')
+        res.status(201).json('Comment saved successfully!');
+      } 
+    )
+  } else {
+    // no image upload
+    comment = {
+      author: req.body.author,
+      comment: req.body.comment,
+      postId: req.body.postId,
+      userId: req.body.userId 
+    }
 
-    pool.query(`INSERT INTO "comment"(author, commenttext, postid, userid) VALUES ($1, $2, $3, $4)`,
-    [comment.author, comment.commentText, comment.postId, comment.userId], 
-    error => {
-      if (error) {
-        throw error
+    pool.query(`INSERT INTO "comments"(author, comment, postid, userid) VALUES ($1, $2, $3, $4)`,
+      [comment.author, comment.comment, comment.postId, comment.userId], 
+      error => {
+        if (error) {
+          res.status(400).json({
+          error: error
+          })
+        }
+        console.log(req.body)
+        console.log('Comment saved successfully')
+        res.status(201).json('Comment saved successfully!');
       }
-      console.log('Comment saved successfully')
-      return res.status(201).json('Comment saved successfully!');  
-    })
-  })
+    )
+  }
 }
-
 
 // MODIFY a comment
 // TODO: test in postman
 exports.modifyComment = (req, res, next) => {
   pool.query(
-    `SELECT * FROM comments WHERE commentid = $1`,
+    `SELECT * FROM "comments" WHERE commentid = $1`,
     [req.params.id],
     (error) => {
       if (error) {
@@ -49,7 +68,7 @@ exports.modifyComment = (req, res, next) => {
       res.status(404).json("Comment does not exist!");
     } else if (comment.rowCount != 0) {
       if (comment.rows[0].userid == req.body.userId) {
-        pool.query(`UPDATE comments SET commentText = $1`,
+        pool.query(`UPDATE "comments" SET commentText = $1`,
           [req.body.commentText],
           (error) => {
             if (error) {
