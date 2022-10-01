@@ -65,9 +65,7 @@ exports.addPost = (req, res, next) => {
   }
 }
 
-
-// get one post
-// TODO: need to grab comments from shown post
+// get one post - works in postman
 exports.getOnePost = (req, res, next) => {
   const id = req.params.id;
   
