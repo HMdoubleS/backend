@@ -1,5 +1,6 @@
 const fs = require('fs');
 const pool = require('../models/pool');
+const { post } = require('../routes/commentRoutes');
 
 
 // get ALL posts - works in postman
@@ -28,7 +29,7 @@ exports.addPost = (req, res, next) => {
       image: url + '/images/' + req.file.filename,
       userId: req.body.userId
     }
-    
+    console.log(req.body)
     pool.query(`INSERT INTO "posts"(title, author, posttext, image, userId ) VALUES ($1, $2, $3, $4, $5)`,
       [post.title, post.author, post.postText, post.image, post.userId], 
       error => {
@@ -50,7 +51,7 @@ exports.addPost = (req, res, next) => {
       postText: req.body.postText,
       userId: req.body.userId 
     }
-
+    console.log(req.body)
     pool.query(`INSERT INTO "posts"(title, author, posttext, userid) VALUES ($1, $2, $3, $4)`,
       [post.title, post.author, post.postText, post.userId], 
       error => {
@@ -89,94 +90,103 @@ exports.getOnePost = (req, res, next) => {
         });
       } 
       console.log(comments.rows)
-      res.status(201).send(posts.rows && comments.rows);
+      res.status(201).json('Post received');
     })
   })
 };
 
 // MODIFY post 
-// TODO: test in postman
 exports.modifyPost = (req, res, next) => {
-  const id = req.params.id
-  pool.query(`SELECT * FROM "posts" WHERE postid = $1`, 
+  const id = req.params.id;
+
+  pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
   [id],
   (error) => {
     if (error) {
-      return res.status(401).json({
+      res.status(401).json({
       error: error,
       });
-    }
-    if (post.rowCount === 0) {
+    } 
+    console.log(req.body)
+    if (id === null) {
       console.log('Post does not exist')
-      res.status(401).json('Post does not exist');
-    } else if (post.rowCount != 0) {
+      res.status(401).json('Post does not exist')
+    } else {
+      console.log(req.file)
       if (req.file) {
         const url = req.protocol + '://' + req.get('host');
-        req.body.post = JSON.parse(req.body.post);
 
         if (post.rows[0].image != null) {
-        const filename = post.image.split('/images/')[1];
-        fs.unlink('images/' + filename, () => {
-         console.log('Old image ' + filename + ' deleted');
-        });
-      }
+          const filename = post.image.split('/images')[1];
+          fs.unlink('images/' + filename, () => {
+            console.log('Old image ' + filename + ' deleted');
+          });
+        }
         const modifiedPost = {
           title: req.body.title,
           author: req.body.author,
           postText: req.body.postText,
-          image: url + '/images/' + req.file.filename,
+          image: url + '/images' + req.file.filename,
           userId: req.body.userId
         }
-        pool.query(
-          `UPDATE "posts" SET title = $2, author = $3, postText = $4, image = $5, userId = $6 WHERE postid = $1`,
-          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.image, modifiedPost.userId], 
+        console.log(modifiedPost)
+
+        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, image = $5, userId = $6 WHERE postid = $1`,
+          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.image, modifiedPost.userId],
           error => {
             if (error) {
               throw error
             }
-            res.status(201).json('Post updated successfullly')
-          }
+          }        
         )
-      } 
-
-    }
-  }
-)};
-  
-
+      } else {
+        const modifiedPost = {
+          title: req.body.title,
+          author: req.body.author,
+          postText: req.body.postText,
+          userId: req.body.userId
+        }
+        console.log(req.body)
+        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, userId = $5 WHERE postid = $1`,
+          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.userId],
+          error => {
+            if (error) {
+              throw error
+            }
+          }        
+        )
+      }
+      console.log('Post updated successfully')
+      res.status(201).json('Post updated successfully')
+    } 
+  })
+}
 
 // DELETE post
-// TODO: test in postman
 exports.deletePost = (req, res, next) => {
-  pool.query(`SELECT * FROM "posts" WHERE postid = $1`, 
-  [req.params.id], 
+  const id = req.params.id;
+
+  pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
+  [id],
   (error) => {
     if (error) {
-      return res.status(401).json({
-        error: error
-      });
+      throw error
     }
-  }) 
-  if (post.rowCount === 0) {
-    console.log('Post does not exist');
-    return res.status(404).json('Post does not exist')
-  } else if (post.rowCount != 0) {
-    if (post.rows[0].userid === id) {
-      pool.query(`DELETE FROM posts WHERE postid = $1`, 
-      [req.params.id], 
+    pool.query(`SELECT * FROM "comments" WHERE postid = $1`,
+    [id],
+    (error) => {
+      if (error) {
+        throw error
+      }
+      pool.query(`DELETE FROM "posts" WHERE postid = $1`, 
+      [id],
       (error) => {
         if (error) {
           throw error
         }
+        console.log('Post deleted successfully')
+        res.status(201).json('Post deleted sucessfully')
       })
-      // if image does exist
-      if (post.rows[0].image != null){
-        const filename = post.image.split('/images/')[1];
-          fs.unlink('images/' + filename, () => {});
-      } 
-      res.status(201).json('Image has been deleted');
-    }
-  } else {
-    res.status(404).json('Unauthorized');
-  }
-};
+    })
+  })
+}
