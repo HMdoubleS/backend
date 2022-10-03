@@ -52,66 +52,87 @@ exports.addComment = (req, res, next) => {
 }
 
 // MODIFY a comment
-// TODO: test in postman
 exports.modifyComment = (req, res, next) => {
-  pool.query(
-    `SELECT * FROM "comments" WHERE commentid = $1`,
-    [req.params.id],
-    (error) => {
-      if (error) {
-        res.status(401).json({
-        error: error,
-      });
-    }
-    if (comment.rowCount == 0) {
-      console.log("Comment does not exist!");
-      res.status(404).json("Comment does not exist!");
-    } else if (comment.rowCount != 0) {
-      if (comment.rows[0].userid == req.body.userId) {
-        pool.query(`UPDATE "comments" SET commentText = $1`,
-          [req.body.commentText],
-          (error) => {
-            if (error) {
-            throw error;
-            }
-            console.log("Comment has been updated");
-            res.status(201).json("Comment has been updated");
-          }
-        );
-      } else {
-        console.log("Unauthorized!");
-        res.status(401).json("Unauthorized!");
-      }
-    }
-  });
-}; 
+  const id = req.params.id;
 
-// DELETE a comment
-// TODO: test in postman
-exports.deleteComment = (req, res, next) => {
-  pool.query(`SELECT * FROM "comments" WHERE commentid = $1`, 
-  [req.params.id], 
+  pool.query(`SELECT * FROM "comments" WHERE commentid = $1`,
+  [id],
   (error) => {
     if (error) {
-      return res.status(401).json({
-        error: error
+      res.status(401).json({
+      error: error,
       });
-    }
-  }) 
-  if (comment.rowCount === 0) {
-    console.log('Comment does not exist');
-    return res.status(404).json('Comment does not exist')
-  } else if (comment.rowCount != 0) {
-    if (comment.rows[0].userid === id) {
-      pool.query(`DELETE FROM "comments" WHERE commentid = $1`, 
-      [req.params.id], 
-      (error) => {
-        if (error) {
-          throw error
+    } 
+    console.log(req.body)
+    if (id === null) {
+      console.log('Comment does not exist')
+      res.status(401).json('Comment does not exist')
+    } else {
+      console.log(req.file)
+      if (req.file) {
+        const url = req.protocol + '://' + req.get('host');
+
+        if (comment.rows[0].image != null) {
+          const filename = post.image.split('/images')[1];
+          fs.unlink('images/' + filename, () => {
+            console.log('Old image ' + filename + ' deleted');
+          });
         }
-      })
+        const modifiedComment = {
+          author: req.body.author,
+          postText: req.body.postText,
+          image: url + '/images' + req.file.filename,
+          userId: req.body.userId
+        }
+
+        pool.query(`UPDATE "comments" SET author = $2, comment = $3, image = $4, userId = $5 WHERE commentid = $1`,
+          [id, modifiedComment.author, modifiedComment.comment, modifiedComment.image, modifiedComment.userId],
+          error => {
+            if (error) {
+              throw error
+            }
+          }        
+        )
+      } else {
+        const modifiedComment = {
+          author: req.body.author,
+          comment: req.body.comment,
+          userId: req.body.userId
+        }
+        console.log(req.body)
+        pool.query(`UPDATE "comments" SET author = $2, comment = $3, userId = $4 WHERE commentid = $1`,
+          [id, modifiedComment.author, modifiedComment.comment, modifiedComment.userId],
+          error => {
+            if (error) {
+              throw error
+            }
+          }        
+        )
+      }
+      console.log('Comment updated successfully')
+      res.status(201).json('Comment updated successfully')
+    } 
+  })
+}
+
+// DELETE a comment
+exports.deleteComment = (req, res, next) => {
+  const id = req.params.id;
+
+  pool.query(`SELECT * FROM "comments" WHERE commentid = $1`,
+  [id],
+  (error) => {
+    if (error) {
+      throw error
     }
-  } else {
-    res.status(404).json('Unauthorized');
-  }
-};
+    pool.query(`DELETE FROM "comments" WHERE commentid = $1`, 
+    [id],
+    (error) => {
+      if (error) {
+        throw error
+      }
+      console.log('Comment deleted successfully')
+      res.status(201).json('Comment deleted sucessfully')
+    })
+  })
+}
