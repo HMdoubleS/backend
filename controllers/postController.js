@@ -67,7 +67,7 @@ exports.addPost = (req, res, next) => {
   }
 }
 
-// get one post - works in postman
+// get one post
 exports.getOnePost = (req, res, next) => {
   const id = req.params.id;
   

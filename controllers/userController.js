@@ -78,17 +78,111 @@ exports.login = (req, res, next) => {
 
 // getting user profile
 exports.getOneUser = (req, res, next) => {
+  const id = req.params.id;
+  
+  pool.query(`SELECT * FROM "users" WHERE userid = $1`,
+  [id],
+  (error, users) => {
+    if (error) {
+      res.status(401).json({
+      error: error,
+      });
+    } 
+    console.log(users.rows)
 
-};
+    pool.query(`SELECT * FROM "posts" WHERE userid = $1 ORDER BY creationDate DESC`,
+    [id],
+    (error, posts) => {
+      if (error) {
+        res.status(401).json({
+          error: error
+        })
+      }
+      console.log(posts.rows)
 
-// MODIFY user
+      pool.query(`SELECT * FROM "comments" WHERE userid = $1 ORDER BY creationDate DESC`,
+      [id],
+      (error, comments) => {
+        if (error) {
+          res.status(401).json({
+            error: error
+          })
+        }
+        console.log(comments.rows)
+        res.status(201).json('Profile received')
+      })
+    })
+  })
+}
+
+
+// MODIFY user -- THIS WORKS BUT unsure how you would do a password change
 exports.modifyUser = (req, res, next) => {
+  const id = req.params.id;
 
-};
+  pool.query(`SELECT * FROM "users" WHERE userid = $1`,
+  [id],
+  (error) => {
+    if (error) {
+      res.status(401).json({
+      error: error,
+      });
+    } 
+    if (id === null) {
+      console.log('User does not exist')
+      res.status(401).json('User does not exist')
+    } else {
+        const modifiedUser = {
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          email: req.body.email
+        }
+        console.log(modifiedUser)
+
+        pool.query(`UPDATE "users" SET firstName = $2, lastName = $3, email = $4 WHERE userid = $1`,
+          [id, modifiedUser.firstName, modifiedUser.lastName, modifiedUser.email],
+          error => {
+            if (error) {
+              throw error
+            }
+          }        
+        )
+      }
+      console.log('User updated successfully')
+      res.status(201).json('User updated successfully')
+    }
+  )
+}
+
 
 // DELETE user
 exports.deleteUser = (req, res, next) => {
+  const id = req.params.id;
 
-};
+  pool.query(`SELECT * FROM "posts" WHERE userid = $1`,
+  [id],
+  (error) => {
+    if (error) {
+      throw error
+    }
+    pool.query(`SELECT * FROM "comments" WHERE userid = $1`,
+    [id],
+    (error) => {
+      if (error) {
+        throw error
+      }
+      pool.query(`DELETE FROM "users" WHERE userid = $1`, 
+      [id],
+      (error) => {
+        if (error) {
+          throw error
+        }
+        console.log('User deleted successfully')
+        res.status(201).json('User deleted sucessfully')
+      })
+    })
+  })
+}
+
 
 
