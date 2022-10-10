@@ -7,18 +7,10 @@ const commentValidation = require('../middleware/validation/commentValidation');
 
 const commentCtrl = require('../controllers/commentController');
 
-// add/create comment
-router.post('/',  function(req, res) {
-    auth, multer, commentValidation, commentCtrl.addComment
-});
-// modify comment
-router.put('/:id', function(req, res) {
-    auth, multer, postValidation, commentCtrl.modifyComment
-});
-// delete comment
-router.delete('/:id', function(req, res) {
-    auth, commentCtrl.deleteComment
-});
+// routes
+router.post('/',  function(req, res) { auth, multer, commentValidation, commentCtrl.addComment });
+router.put('/:id', function(req, res) { auth, multer, postValidation, commentCtrl.modifyComment });
+router.delete('/:id', function(req, res) { auth, commentCtrl.deleteComment });
 
 // postman routes
 // router.post('/', multer, commentCtrl.addComment);
