@@ -3,7 +3,7 @@ const pool = require('../models/pool');
 const { post } = require('../routes/commentRoutes');
 
 
-// get ALL posts - works in postman
+// get ALL posts
 exports.getAllPosts = (req, res, next) => {
   pool.query(`SELECT * FROM "posts" ORDER BY creationDate DESC`,
   (error, posts) => {
@@ -11,9 +11,9 @@ exports.getAllPosts = (req, res, next) => {
       return res.status(400).json({
       error: error
       });
-     }
-     console.log(posts.rows)
-     res.status(201).json(posts)
+    }
+    console.log(posts.rows)
+    return res.status(200).json(posts.rows)
   })
 };
 
