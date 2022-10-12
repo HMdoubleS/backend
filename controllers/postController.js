@@ -13,6 +13,7 @@ exports.getAllPosts = (req, res, next) => {
       });
      }
      console.log(posts.rows)
+     res.status(201).json(posts)
   })
 };
 
