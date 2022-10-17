@@ -5,6 +5,7 @@ const { post } = require('../routes/commentRoutes');
 
 // get ALL posts
 exports.getAllPosts = (req, res, next) => {
+  const id = req.params.id;
   pool.query(`SELECT * FROM "posts" ORDER BY creationDate DESC`,
   (error, posts) => {
     if (error) {
@@ -15,7 +16,8 @@ exports.getAllPosts = (req, res, next) => {
     console.log(posts.rows)
     return res.status(200).json(posts.rows)
   })
-};
+
+}
 
 // CREATE a post - works in postman
 exports.addPost = (req, res, next) => {
@@ -81,20 +83,21 @@ exports.getOnePost = (req, res, next) => {
       });
     } 
     console.log(posts.rows)
-
-    pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`,
-    [id],
-    (error, comments) => {
-      if (error) {
-        res.status(401).json({
-        error: error,
-        });
-      } 
-      console.log(comments.rows)
-      res.status(201).json('Post received');
-    })
+    return res.status(200).json(posts.rows)
   })
-};
+  //   pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`,
+  //   [id],
+  //   (error, comments) => {
+  //     if (error) {
+  //       res.status(401).json({
+  //       error: error,
+  //       });
+  //     } 
+  //     console.log(comments.rows)
+  //     res.status(201).json('Post received');
+  //   })
+  // })
+}
 
 // MODIFY post 
 exports.modifyPost = (req, res, next) => {
