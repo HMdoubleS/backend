@@ -42,6 +42,7 @@ const createTables = () => {
             author VARCHAR NOT NULL,
             postText VARCHAR NOT NULL,
             image VARCHAR,
+            readBy TEXT [],
             userId uuid NOT NULL,
             creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY (postId),

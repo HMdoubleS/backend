@@ -1,6 +1,5 @@
 const fs = require('fs');
 const pool = require('../models/pool');
-const { post } = require('../routes/commentRoutes');
 
 
 // get ALL posts
@@ -33,17 +32,15 @@ exports.addPost = (req, res, next) => {
       userId: req.body.userId
     }
     console.log(req.body)
-    pool.query(`INSERT INTO "posts"(title, author, posttext, image, userId ) VALUES ($1, $2, $3, $4, $5)`,
-      [post.title, post.author, post.postText, post.image, post.userId], 
+    pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [post.title, post.author, post.postText, post.image, post. readby, post.userId], 
       error => {
         if (error) {
-          res.status(400).json({
-          error: error
-          })
+          throw error
         }
         console.log(req.body)
         console.log('Post saved successfully')
-        res.status(201).json('Post saved successfully!');
+        res.status(200).json(post);
       } 
     )
   } else {
@@ -55,16 +52,14 @@ exports.addPost = (req, res, next) => {
       userId: req.body.userId 
     }
     console.log(req.body)
-    pool.query(`INSERT INTO "posts"(title, author, posttext, userid) VALUES ($1, $2, $3, $4)`,
-      [post.title, post.author, post.postText, post.userId], 
+    pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, $4, $5)`,
+      [post.title, post.author, post.postText, post.readby, post.userId], 
       error => {
         if (error) {
-          res.status(400).json({
-          error: error
-          })
+          throw error
         }
         console.log('Post saved successfully')
-        res.status(201).json('Post saved successfully!');
+        res.status(201).json(post);
       }
     )
   }
@@ -82,8 +77,8 @@ exports.getOnePost = (req, res, next) => {
       error: error,
       });
     } 
-    console.log(posts.rows)
-    return res.status(200).json(posts.rows)
+    console.log(posts)
+    return res.status(200).json(posts)
   })
   //   pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`,
   //   [id],
