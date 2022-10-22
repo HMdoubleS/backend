@@ -34,6 +34,7 @@ const createTables = () => {
     .catch((error) => {
         console.log(error);
     })
+   // TODO: add a readby
     .then(() => {
         const postTable = 
         `CREATE TABLE IF NOT EXISTS posts(
@@ -42,7 +43,7 @@ const createTables = () => {
             author VARCHAR NOT NULL,
             postText VARCHAR NOT NULL,
             image VARCHAR,
-            readBy TEXT [],
+            readby TEXT [],
             userId uuid NOT NULL,
             creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY (postId),
@@ -59,35 +60,35 @@ const createTables = () => {
             console.log(error);
         })
     })
-    .then(() => {
-        const commentTable = 
-        `CREATE TABLE IF NOT EXISTS comments(
-            commentId uuid DEFAULT gen_random_uuid(),
-            author VARCHAR NOT NULL,
-            comment VARCHAR NOT NULL,
-            image VARCHAR,
-            postId uuid NOT NULL,
-            userId uuid NOT NULL,
-            creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            PRIMARY KEY (commentId),
-            CONSTRAINT fk_user
-                FOREIGN KEY (userId)
-                REFERENCES users(userId)
-                ON DELETE CASCADE,
-            CONSTRAINT fk_post
-                FOREIGN KEY (postId)
-                REFERENCES posts(postId)
-                ON DELETE CASCADE 
-        )`
-        pool.query(commentTable)
-        .then((res) => {
-            console.log(res);
-        })
-        .catch((error) => {
-            console.log(error);
-            pool.end();
-        })
-    })
+    // .then(() => {
+    //     const commentTable = 
+    //     `CREATE TABLE IF NOT EXISTS comments(
+    //         commentId uuid DEFAULT gen_random_uuid(),
+    //         author VARCHAR NOT NULL,
+    //         comment VARCHAR NOT NULL,
+    //         image VARCHAR,
+    //         postId uuid NOT NULL,
+    //         userId uuid NOT NULL,
+    //         creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    //         PRIMARY KEY (commentId),
+    //         CONSTRAINT fk_user
+    //             FOREIGN KEY (userId)
+    //             REFERENCES users(userId)
+    //             ON DELETE CASCADE,
+    //         CONSTRAINT fk_post
+    //             FOREIGN KEY (postId)
+    //             REFERENCES posts(postId)
+    //             ON DELETE CASCADE 
+    //     )`
+    //     pool.query(commentTable)
+    //     .then((res) => {
+    //         console.log(res);
+    //     })
+    //     .catch((error) => {
+    //         console.log(error);
+    //         pool.end();
+    //     })
+    // })
 }
 
 module.exports = createTables;

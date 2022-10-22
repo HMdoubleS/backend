@@ -4,7 +4,6 @@ const pool = require('../models/pool');
 
 // get ALL posts
 exports.getAllPosts = (req, res, next) => {
-  const id = req.params.id;
   pool.query(`SELECT * FROM "posts" ORDER BY creationDate DESC`,
   (error, posts) => {
     if (error) {
@@ -18,7 +17,7 @@ exports.getAllPosts = (req, res, next) => {
 
 }
 
-// CREATE a post - works in postman
+// CREATE POST
 exports.addPost = (req, res, next) => {
   let post;
   // if there is an image upload
@@ -29,11 +28,12 @@ exports.addPost = (req, res, next) => {
       author: req.body.author,
       postText: req.body.postText,
       image: url + '/images/' + req.file.filename,
+      readby: req.body.readby,
       userId: req.body.userId
     }
     console.log(req.body)
-    pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [post.title, post.author, post.postText, post.image, post. readby, post.userId], 
+    pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, ARRAY[$5], $6)`,
+      [post.title, post.author, post.postText, post.image, post.readby, post.userId], 
       error => {
         if (error) {
           throw error
@@ -49,10 +49,11 @@ exports.addPost = (req, res, next) => {
       title: req.body.title,
       author: req.body.author,
       postText: req.body.postText,
+      readby: req.body.readby,
       userId: req.body.userId 
     }
     console.log(req.body)
-    pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, $4, $5)`,
+    pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, ARRAY[$4], $5)`,
       [post.title, post.author, post.postText, post.readby, post.userId], 
       error => {
         if (error) {
@@ -65,7 +66,7 @@ exports.addPost = (req, res, next) => {
   }
 }
 
-// get one post
+// GET ONE POST
 exports.getOnePost = (req, res, next) => {
   const id = req.params.id;
   
@@ -94,7 +95,7 @@ exports.getOnePost = (req, res, next) => {
   // })
 }
 
-// MODIFY post 
+// MODIFY POST
 exports.modifyPost = (req, res, next) => {
   const id = req.params.id;
 
@@ -126,12 +127,13 @@ exports.modifyPost = (req, res, next) => {
           author: req.body.author,
           postText: req.body.postText,
           image: url + '/images' + req.file.filename,
+          readby: req.body.readby,
           userId: req.body.userId
         }
         console.log(modifiedPost)
 
-        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, image = $5, userId = $6 WHERE postid = $1`,
-          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.image, modifiedPost.userId],
+        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, image = $5, readby = $6, userId = $7 WHERE postid = $1`,
+          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.image, modifiedPost.readby, modifiedPost.userId],
           error => {
             if (error) {
               throw error
@@ -143,11 +145,12 @@ exports.modifyPost = (req, res, next) => {
           title: req.body.title,
           author: req.body.author,
           postText: req.body.postText,
+          readby: req.body.readby,
           userId: req.body.userId
         }
         console.log(req.body)
-        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, userId = $5 WHERE postid = $1`,
-          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.userId],
+        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, readby = $5, userId = $6 WHERE postid = $1`,
+          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.readby, modifiedPost.userId],
           error => {
             if (error) {
               throw error
@@ -161,7 +164,7 @@ exports.modifyPost = (req, res, next) => {
   })
 }
 
-// DELETE post
+// DELETE POST
 exports.deletePost = (req, res, next) => {
   const id = req.params.id;
 
