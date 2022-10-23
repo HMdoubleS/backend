@@ -29,20 +29,30 @@ exports.addPost = (req, res, next) => {
       postText: req.body.postText,
       image: url + '/images/' + req.file.filename,
       readby: req.body.readby,
-      userId: req.body.userId
+      userId: req.auth.userId
     }
     console.log(req.body)
-    pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, ARRAY[$5], $6)`,
-      [post.title, post.author, post.postText, post.image, post.readby, post.userId], 
-      error => {
-        if (error) {
-          throw error
-        }
-        console.log(req.body)
-        console.log('Post saved successfully')
-        res.status(200).json(post);
-      } 
-    )
+
+    pool.query(`SELECT * FROM "users" WHERE userid = $1,`
+    [req.auth.userId],
+    (error) => {
+      if (error) {
+        return res.status(401).json({
+          error: error
+        })
+      }
+      pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, ARRAY[$5], $6)`,
+        [post.title, post.author, post.postText, post.image, post.readby, req.auth.userId], 
+        error => {
+          if (error) {
+            throw error
+          }
+          console.log(req.body)
+          console.log('Post saved successfully')
+          res.status(200).json(post);
+        } 
+      )
+    })
   } else {
     // no image upload
     post = {
@@ -50,20 +60,30 @@ exports.addPost = (req, res, next) => {
       author: req.body.author,
       postText: req.body.postText,
       readby: req.body.readby,
-      userId: req.body.userId 
+      userId: req.auth.userId 
     }
     console.log(req.body)
-    pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, ARRAY[$4], $5)`,
-      [post.title, post.author, post.postText, post.readby, post.userId], 
-      error => {
-        if (error) {
-          throw error
-        }
-        console.log('Post saved successfully')
-        res.status(201).json(post);
+
+    pool.query(`SELECT * FROM "users" WHERE userId = $1,`
+    [req.auth.userId],
+    (error) => {
+      if (error) {
+        return res.status(401).json({
+          error: error
+        })
       }
-    )
-  }
+      pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, ARRAY[$4], $5)`,
+        [post.title, post.author, post.postText, post.readby, req.auth.userId], 
+        error => {
+          if (error) {
+            throw error
+          }
+          console.log('Post saved successfully')
+          res.status(201).json(post);
+        }
+      )
+    }
+  )}
 }
 
 // GET ONE POST
@@ -81,6 +101,20 @@ exports.getOnePost = (req, res, next) => {
     console.log(posts)
     return res.status(200).json(posts)
   })
+  const findReadBy = post.rows[0].readby.includes(req.auth.userId);
+    if (findReadBy == false) {
+    pool.query(`UPDATE posts SET readby = ARRAY_APPEND (readby, $1) WHERE postid = $2`,
+    [req.auth.userId, req.params.id],
+    (error) => {
+        if (error) {
+        return res.status(401).json({
+            error: error,
+        });
+        } else {
+        res.status(201).json(onePost);
+        }
+      })
+    }
   //   pool.query(`SELECT * FROM "comments" WHERE postid = $1 ORDER BY creationDate DESC`,
   //   [id],
   //   (error, comments) => {
@@ -128,12 +162,12 @@ exports.modifyPost = (req, res, next) => {
           postText: req.body.postText,
           image: url + '/images' + req.file.filename,
           readby: req.body.readby,
-          userId: req.body.userId
+          userId: id
         }
         console.log(modifiedPost)
 
-        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, image = $5, readby = $6, userId = $7 WHERE postid = $1`,
-          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.image, modifiedPost.readby, modifiedPost.userId],
+        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, image = $5, readby = ARRAY[$6], userId = $7 WHERE postid = $1`,
+          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.image, modifiedPost.readby, id],
           error => {
             if (error) {
               throw error
@@ -146,11 +180,11 @@ exports.modifyPost = (req, res, next) => {
           author: req.body.author,
           postText: req.body.postText,
           readby: req.body.readby,
-          userId: req.body.userId
+          userId: id
         }
         console.log(req.body)
-        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, readby = $5, userId = $6 WHERE postid = $1`,
-          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.readby, modifiedPost.userId],
+        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, readby = ARRAY[$5], userId = $6 WHERE postid = $1`,
+          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.readby, id],
           error => {
             if (error) {
               throw error

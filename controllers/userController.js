@@ -2,8 +2,21 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../models/pool');
 
+const isValidEmail = require('../middleware/validation');
+const validatePassword = require('../middleware/validation');
+const isEmpty = require('../middleware/validation');
+
 // signup - works in postman
 exports.signup = (req, res, next) => {
+  if (isEmpty(email) || isEmpty(firstName) || isEmpty(lastName) || isEmpty(password)) {
+    res.status(401).json('Email, password, first name and last name field cannot be empty');
+  }
+  if (!isValidEmail(email)) {
+    res.status(401).json('Please enter a valid Email');
+  }
+  if (!validatePassword(password)) {
+    res.status(401).json('Password must be more than five(5) characters');
+  } else if (isValidEmail && validatePassword === true) {
   bcrypt.hash(req.body.password, 10).then((hash) => {
     const user = {
         firstName: req.body.firstName,
@@ -38,6 +51,7 @@ exports.signup = (req, res, next) => {
       }
     })
   })
+  }
 };
 
 // this throws a postgres error in postman
