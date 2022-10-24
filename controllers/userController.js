@@ -2,21 +2,27 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../models/pool');
 
-const isValidEmail = require('../middleware/validation');
-const validatePassword = require('../middleware/validation');
-const isEmpty = require('../middleware/validation');
+const passwordValidator = require('password-validator');
+const emailValidator = require('email-validator');
 
 // signup - works in postman
 exports.signup = (req, res, next) => {
-  if (isEmpty(email) || isEmpty(firstName) || isEmpty(lastName) || isEmpty(password)) {
-    res.status(401).json('Email, password, first name and last name field cannot be empty');
+  let validInfo = false;
+  let schema = new passwordValidator()
+    .is().min(8)                                    // Minimum length 8
+    .is().max(15)                                  // Maximum length 15
+    .has().uppercase(1)                              // Must have at least one uppercase letter
+    .has().lowercase(1)                              // Must have at least one lowercase letter
+    .has().digits(1)                              // Must have at least 1 number
+    .has().symbols(1)                               // Must have at least one symbol
+    .has().not().spaces();                         // Should not have spaces
+  if (emailValidator.validate(req.body.email)) {
+    console.log(emailValidator.validate(req.body.email))
   }
-  if (!isValidEmail(email)) {
-    res.status(401).json('Please enter a valid Email');
+  if (schema.validate(req.body.password) && emailValidator.validate(req.body.email) === true) {
+    validInfo = true
   }
-  if (!validatePassword(password)) {
-    res.status(401).json('Password must be more than five(5) characters');
-  } else if (isValidEmail && validatePassword === true) {
+  if (validInfo) {
   bcrypt.hash(req.body.password, 10).then((hash) => {
     const user = {
         firstName: req.body.firstName,
