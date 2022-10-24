@@ -75,7 +75,8 @@ exports.login = (req, res, next) => {
           return res.status(401).json('User is not valid');
       }
       if (user.rowCount != 0) {
-        bcrypt.compare(req.body.password, user.rows[0].password).then((valid) => {
+        bcrypt.compare(req.body.password, user.rows[0].password).then(
+          (valid) => {
             if (!valid) {
               return res.status(401).json('Incorrect password!');
             }
@@ -85,8 +86,6 @@ exports.login = (req, res, next) => {
               { expiresIn: '24h' });
             res.status(200).json({
               userId: user.rows[0].userid,
-              firstName: user.rows[0].firstName,
-              lastName: user.rows[0].lastName,
               token: token
             });
           }
