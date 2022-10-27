@@ -118,19 +118,19 @@ exports.getOneUser = (req, res, next) => {
         })
       }
       console.log(posts.rows)
-
-      pool.query(`SELECT * FROM "comments" WHERE userid = $1 ORDER BY creationDate DESC`,
-      [id],
-      (error, comments) => {
-        if (error) {
-          res.status(401).json({
-            error: error
-          })
-        }
-        console.log(comments.rows)
-        res.status(201).json('Profile received')
-      })
     })
+    //   pool.query(`SELECT * FROM "comments" WHERE userid = $1 ORDER BY creationDate DESC`,
+    //   [id],
+    //   (error, comments) => {
+    //     if (error) {
+    //       res.status(401).json({
+    //         error: error
+    //       })
+    //     }
+    //     console.log(comments.rows)
+    //     res.status(201).json('Profile received')
+    //   })
+    // })
   })
 }
 

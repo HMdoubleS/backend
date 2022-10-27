@@ -29,23 +29,26 @@ exports.addPost = (req, res, next) => {
       postText: req.body.postText,
       image: url + '/images/' + req.file.filename,
       readby: req.body.readby,
-      userId: req.auth.userId
+      userId: req.body.userId
     }
-    console.log(req.body)
+    console.log(req.body.userId)
 
     pool.query(`SELECT * FROM "users" WHERE userid = $1,`
-    [req.auth.userId],
+    [req.params.userId],
     (error) => {
       if (error) {
         return res.status(401).json({
           error: error
         })
       }
+      console.log(req.params.userId)
       pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, ARRAY[$5], $6)`,
-        [post.title, post.author, post.postText, post.image, post.readby, req.auth.userId], 
+        [post.title, post.author, post.postText, post.image, post.readby, req.body.userId], 
         error => {
           if (error) {
-            throw error
+            return res.status(401).json({
+              error: error
+            })
           }
           console.log(req.body)
           console.log('Post saved successfully')
@@ -60,23 +63,26 @@ exports.addPost = (req, res, next) => {
       author: req.body.author,
       postText: req.body.postText,
       readby: req.body.readby,
-      userId: req.auth.userId 
+      userId: req.body.userId 
     }
     console.log(req.body)
 
     pool.query(`SELECT * FROM "users" WHERE userId = $1,`
-    [req.auth.userId],
+    [req.params.userId],
     (error) => {
       if (error) {
         return res.status(401).json({
           error: error
         })
       }
+      console.log(req.params.userId)
       pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, ARRAY[$4], $5)`,
-        [post.title, post.author, post.postText, post.readby, req.auth.userId], 
+        [post.title, post.author, post.postText, post.readby, req.body.userId], 
         error => {
           if (error) {
-            throw error
+            return res.status(401).json({
+              error: error
+            })
           }
           console.log('Post saved successfully')
           res.status(201).json(post);
