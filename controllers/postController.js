@@ -42,7 +42,7 @@ exports.addPost = (req, res, next) => {
         }
         console.log(req.body)
         console.log('Post saved successfully')
-        res.status(200).json(post);
+        return res.status(200).json(post);
       } 
     )
 
@@ -66,7 +66,7 @@ exports.addPost = (req, res, next) => {
           })
         }
         console.log('Post saved successfully')
-        res.status(201).json(post);
+        return res.status(201).json(post);
       }
     )
   }
