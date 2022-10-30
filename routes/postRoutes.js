@@ -8,6 +8,7 @@ const postCtrl = require('../controllers/postController');
 
 // routes
 router.get('/', auth, postCtrl.getAllPosts );
+router.get('/:id', auth, postCtrl.getAllPostsByUser)
 router.post('/', auth, multer, postCtrl.addPost );
 router.get('/:id', auth, postCtrl.getOnePost );
 router.put('/:id', auth, multer, postCtrl.modifyPost );

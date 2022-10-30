@@ -16,6 +16,22 @@ exports.getAllPosts = (req, res, next) => {
   })
 
 }
+// get all posts by userId
+exports.getAllPostsByUser = (req, res, next) => {
+  const id = req.params.id;
+  pool.query(`SELECT * FROM "posts" WHERE userId = $1`,
+  [id],
+  (error, posts) => {
+    if (error) {
+      return res.status(400).json({
+      error: error
+      });
+    }
+    console.log(posts.rows)
+    return res.status(200).json(posts.rows)
+  })
+
+}
 
 // CREATE POST
 exports.addPost = (req, res, next) => {
@@ -31,7 +47,7 @@ exports.addPost = (req, res, next) => {
       readby: req.body.readby,
       userId: req.auth.userId
     }
-    
+    console.log('Pete')
     pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, ARRAY[$5], $6)`,
       [post.title, post.author, post.postText, post.image, post.readby, req.auth.userId], 
       error => {
@@ -55,7 +71,7 @@ exports.addPost = (req, res, next) => {
       readby: req.body.readby,
       userId: req.auth.userId 
     }
-    console.log(req.body)
+    console.log('Jalepeno')
 
     pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, ARRAY[$4], $5)`,
       [post.title, post.author, post.postText, post.readby, req.auth.userId], 
