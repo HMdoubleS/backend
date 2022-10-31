@@ -5,7 +5,7 @@ const pool = require('../models/pool');
 const passwordValidator = require('password-validator');
 const emailValidator = require('email-validator');
 
-// signup - works in postman
+// SIGNUP
 exports.signup = (req, res, next) => {
   let validInfo = false;
   let schema = new passwordValidator()
@@ -60,7 +60,7 @@ exports.signup = (req, res, next) => {
   }
 };
 
-// this throws a postgres error in postman
+// LOGIN
 exports.login = (req, res, next) => {
     pool.query(`SELECT * FROM "users" WHERE email = $1`,
     [req.body.email],
@@ -95,7 +95,7 @@ exports.login = (req, res, next) => {
 };
   
 
-// getting user profile
+// GET ONE USER
 exports.getOneUser = (req, res, next) => {
   const id = req.params.id;
   
@@ -119,23 +119,11 @@ exports.getOneUser = (req, res, next) => {
       }
       console.log(posts.rows)
     })
-    //   pool.query(`SELECT * FROM "comments" WHERE userid = $1 ORDER BY creationDate DESC`,
-    //   [id],
-    //   (error, comments) => {
-    //     if (error) {
-    //       res.status(401).json({
-    //         error: error
-    //       })
-    //     }
-    //     console.log(comments.rows)
-    //     res.status(201).json('Profile received')
-    //   })
-    // })
   })
 }
 
 
-// MODIFY user -- THIS WORKS BUT unsure how you would do a password change
+// MODIFY USER -- set up for after presentation
 exports.modifyUser = (req, res, next) => {
   const id = req.params.id;
 
@@ -174,7 +162,7 @@ exports.modifyUser = (req, res, next) => {
 }
 
 
-// DELETE user
+// DELETE USER
 exports.deleteUser = (req, res, next) => {
   const id = req.params.id;
 
@@ -184,12 +172,6 @@ exports.deleteUser = (req, res, next) => {
     if (error) {
       throw error
     }
-    pool.query(`SELECT * FROM "comments" WHERE userid = $1`,
-    [id],
-    (error) => {
-      if (error) {
-        throw error
-      }
       pool.query(`DELETE FROM "users" WHERE userid = $1`, 
       [id],
       (error) => {
@@ -200,7 +182,7 @@ exports.deleteUser = (req, res, next) => {
         res.status(201).json('User deleted sucessfully')
       })
     })
-  })
+
 }
 
 
