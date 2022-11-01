@@ -112,20 +112,6 @@ exports.getOnePost = (req, res, next) => {
     console.log(posts)
     return res.status(200).json(posts)
   })
-  const findReadBy = post.rows[0].readby.includes(req.auth.userId);
-    if (findReadBy == false) {
-    pool.query(`UPDATE posts SET readby = ARRAY_APPEND (readby, $1) WHERE postid = $2`,
-    [req.auth.userId, req.params.id],
-    (error) => {
-        if (error) {
-        return res.status(401).json({
-            error: error,
-        });
-        } else {
-        res.status(201).json(onePost);
-        }
-      })
-    }
 }
 
 // MODIFY POST
