@@ -1,5 +1,6 @@
 const fs = require('fs');
 const pool = require('../models/pool');
+const { post } = require('../routes/postRoutes');
 
 
 // get ALL posts
@@ -14,7 +15,6 @@ exports.getAllPosts = (req, res, next) => {
     console.log(posts.rows)
     return res.status(200).json(posts.rows)
   })
-
 }
 // get all posts by userId
 exports.getAllPostsByUser = (req, res, next) => {
@@ -30,22 +30,57 @@ exports.getAllPostsByUser = (req, res, next) => {
     console.log(posts.rows)
     return res.status(200).json(posts.rows)
   })
-
 }
+
+// Mark readby
+exports.setReadby = (req, res, next) => {
+  pool.query(`SELECT * FROM users WHERE userid = $1`,
+    [req.auth.userId],
+    (error) => {
+      if (error) {
+        return res.status(401).json({
+          error: error,
+        });
+      }
+      pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
+      [req.params.id],
+      (error, posts) => {
+        if (error) {
+          res.status(401).json({
+          error: error,
+          });
+        } 
+        
+        const setReadBy = {
+          readby: req.auth.userId,
+        }
+        console.log(req.body)
+        pool.query(`UPDATE "posts" SET readby= $2 WHERE postid = $1`,
+        [setReadBy.readby, req.params.id],
+          error => {
+            if (error) {
+              throw error
+            }
+          })
+        console.log('post has been read')
+        return res.status(200).json(posts)      
+      })
+  })
+}
+
 
 // CREATE POST
 exports.addPost = (req, res, next) => {
   let post;
   // if there is an image upload
   if (req.file) { 
-    req.body.post = JSON.parse(req.body.post)
+    req.body.post = JSON.parse(req.body.post);
     const url = req.protocol + '://' + req.get('host')
     post = {
       title: req.body.post.title,
       author: req.body.post.author,
       postText: req.body.post.postText,
       image: url + '/images/' + req.file.filename,
-      readby: req.body.readby,
       userId: req.auth.userId
     }
     pool.query(
@@ -57,8 +92,8 @@ exports.addPost = (req, res, next) => {
          error: error,
         });
        }
-      pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, ARRAY[$5], $6)`,
-        [post.title, post.author, post.postText, post.image, post.readby, req.auth.userId], 
+      pool.query(`INSERT INTO "posts"(title, author, posttext, image, userId ) VALUES ($1, $2, $3, $4, $5)`,
+        [post.title, post.author, post.postText, post.image, req.auth.userId], 
         error => {
           if (error) {
             return res.status(401).json({
@@ -77,13 +112,12 @@ exports.addPost = (req, res, next) => {
       title: req.body.title,
       author: req.body.author,
       postText: req.body.postText,
-      readby: req.body.readby,
       userId: req.auth.userId 
     }
     console.log('Jalepeno')
 
-    pool.query(`INSERT INTO "posts"(title, author, posttext, readby, userid) VALUES ($1, $2, $3, ARRAY[$4], $5)`,
-      [post.title, post.author, post.postText, post.readby, req.auth.userId], 
+    pool.query(`INSERT INTO "posts"(title, author, posttext, userid) VALUES ($1, $2, $3, $4)`,
+      [post.title, post.author, post.postText, req.auth.userId], 
       error => {
         if (error) {
           return res.status(401).json({
@@ -110,78 +144,48 @@ exports.getOnePost = (req, res, next) => {
       });
     } 
     console.log(posts)
-    return res.status(200).json(posts)
+    return res.status(200).json(posts.rows)
   })
 }
 
 // MODIFY POST
-exports.modifyPost = (req, res, next) => {
-  const id = req.params.id;
+// exports.modifyPost = (req, res, next) => {
+//   const id = req.params.id;
 
-  pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
-  [id],
-  (error) => {
-    if (error) {
-      res.status(401).json({
-      error: error,
-      });
-    } 
-    console.log(req.body)
-    if (id === null) {
-      console.log('Post does not exist')
-      res.status(401).json('Post does not exist')
-    } else {
-      console.log(req.file)
-      if (req.file) {
-        const url = req.protocol + '://' + req.get('host');
-
-        if (post.rows[0].image != null) {
-          const filename = post.image.split('/images')[1];
-          fs.unlink('images/' + filename, () => {
-            console.log('Old image ' + filename + ' deleted');
-          });
-        }
-        const modifiedPost = {
-          title: req.body.title,
-          author: req.body.author,
-          postText: req.body.postText,
-          image: url + '/images' + req.file.filename,
-          readby: req.body.readby,
-          userId: id
-        }
-        console.log(modifiedPost)
-
-        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, image = $5, readby = ARRAY[$6], userId = $7 WHERE postid = $1`,
-          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.image, modifiedPost.readby, id],
-          error => {
-            if (error) {
-              throw error
-            }
-          }        
-        )
-      } else {
-        const modifiedPost = {
-          title: req.body.title,
-          author: req.body.author,
-          postText: req.body.postText,
-          readby: req.body.readby,
-          userId: id
-        }
-        console.log(req.body)
-        pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, readby = ARRAY[$5], userId = $6 WHERE postid = $1`,
-          [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, modifiedPost.readby, id],
-          error => {
-            if (error) {
-              throw error
-            }
-          }        
-        )
-      }
-      console.log('Post updated successfully')
-      res.status(201).json('Post updated successfully')
-    } 
-  })
-}
+//   pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
+//   [id],
+//   (error) => {
+//     if (error) {
+//       res.status(401).json({
+//       error: error,
+//       });
+//     } 
+//     console.log(req.body)
+//     if (id === null) {
+//       console.log('Post does not exist')
+//       res.status(401).json('Post does not exist')
+//     } else {
+//         const modifiedPost = {
+//           title: req.body.title,
+//           author: req.body.author,
+//           postText: req.body.postText,
+//           userId: id
+//         }
+//         console.log(req.body)
+//         pool.query(`UPDATE "posts" SET title = $2, author = $3, postText = $4, userId = $5 WHERE postid = $1`,
+//           [id, modifiedPost.title, modifiedPost.author, modifiedPost.postText, id],
+//           error => {
+//             if (error) {
+//               throw error
+//             }
+//           }        
+//         )
+//       }
+//       console.log('Post updated successfully')
+//       // res.status(201).json('Post updated successfully')
+//     } 
+//   )
+// }
 
 // DELETE POST
 exports.deletePost = (req, res, next) => {
