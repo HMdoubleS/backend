@@ -35,31 +35,39 @@ exports.getAllPostsByUser = (req, res, next) => {
 
 // Mark readby
 exports.setReadby = (req, res, next) => {
+  pool.query(`SELECT * FROM users WHERE userid = $1`,
+      [req.auth.userId],
+      (error) => {
+        if (error) {
+          return res.status(401).json({
+            error: error,
+          });
+        }
+  
   pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
   [req.params.id],
-  (error, posts) => {
+  (error, post) => {
     if (error) {
       res.status(401).json({
       error: error,
       });
     } 
-    
-    const setReadBy = {
-      readby: req.body.readby,
-      postId: req.params.id
-    }
-    console.log(req.body)
-    pool.query(`UPDATE "posts" SET readby = ARRAY_APPEND (readby, $2) WHERE postid = $1`,
-    [setReadBy.readby, req.params.id],
-      error => {
-        if (error) {
-          throw error
-        }
-      })
-    console.log('post has been read')
-    return res.status(200).json(posts)      
+    const findReadBy = post.rows[0].readby.includes(req.auth.userId);
+      if (findReadBy == false) {
+      pool.query(`UPDATE "posts" SET readby = ARRAY_APPEND (readby, $1) WHERE postid = $2`,
+      [req.auth.userId, req.params.id],
+        error => {
+          if (error) {
+            throw error
+          }
+        })
+      console.log('post has been read')
+      return res.status(200).json(post)   
+      }   
+    })
   })
 }
+
 
 
 
@@ -78,8 +86,7 @@ exports.addPost = (req, res, next) => {
       // readby: req.body.readby,
       userId: req.auth.userId
     }
-    pool.query(
-      `SELECT * FROM users WHERE userid = $1`,
+    pool.query(`SELECT * FROM users WHERE userid = $1`,
       [req.auth.userId],
       (error) => {
        if (error) {
@@ -87,7 +94,7 @@ exports.addPost = (req, res, next) => {
          error: error,
         });
        }
-      pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, $5)`,
+      pool.query(`INSERT INTO "posts"(title, author, posttext, image, userId ) VALUES ($1, $2, $3, $4, $5)`,
         [post.title, post.author, post.postText, post.image, req.auth.userId], 
         error => {
           if (error) {
@@ -129,20 +136,20 @@ exports.addPost = (req, res, next) => {
 
 // GET ONE POST
 exports.getOnePost = (req, res, next) => {
-  const id = req.params.id;
-  
   pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
-  [id],
-  (error, posts) => {
-    if (error) {
+    [req.params.id],
+    (error, post) => {
+     if (error) {
       res.status(401).json({
-      error: error,
-      });
-    } 
-    console.log(posts)
-    return res.status(200).json(posts.rows)
-  })
+        error: error,
+        });
+      }
+      console.log(post.rows)
+      return res.status(201).json(post.rows);
+    }
+  )
 }
+
 
 // MODIFY POST
 // exports.modifyPost = (req, res, next) => {
