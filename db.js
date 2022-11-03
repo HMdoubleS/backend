@@ -34,7 +34,6 @@ const createTables = () => {
     .catch((error) => {
         console.log(error);
     })
-   // TODO: add a readby
     .then(() => {
         const postTable = 
         `CREATE TABLE IF NOT EXISTS posts(

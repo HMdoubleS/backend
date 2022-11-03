@@ -17,7 +17,7 @@ exports.getAllPosts = (req, res, next) => {
   })
 }
 
-// get all posts by userId
+// get ALL posts by USERID
 exports.getAllPostsByUser = (req, res, next) => {
   const id = req.params.id;
   pool.query(`SELECT * FROM "posts" WHERE userId = $1`,
@@ -68,9 +68,6 @@ exports.setReadby = (req, res, next) => {
   })
 }
 
-
-
-
 // CREATE POST
 exports.addPost = (req, res, next) => {
   let post;
@@ -83,7 +80,6 @@ exports.addPost = (req, res, next) => {
       author: req.body.post.author,
       postText: req.body.post.postText,
       image: url + '/images/' + req.file.filename,
-      // readby: req.body.readby,
       userId: req.auth.userId
     }
     pool.query(`SELECT * FROM users WHERE userid = $1`,
@@ -114,7 +110,6 @@ exports.addPost = (req, res, next) => {
       title: req.body.title,
       author: req.body.author,
       postText: req.body.postText,
-      // readby: req.body.readby,
       userId: req.auth.userId 
     }
     console.log('Jalepeno')
@@ -151,7 +146,7 @@ exports.getOnePost = (req, res, next) => {
 }
 
 
-// MODIFY POST
+// MODIFY POST -- for after p7 pass off
 // exports.modifyPost = (req, res, next) => {
 //   const id = req.params.id;
 
