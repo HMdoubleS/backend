@@ -1,6 +1,6 @@
 const fs = require('fs');
 const pool = require('../models/pool');
-const { post } = require('../routes/postRoutes');
+
 
 
 // get ALL posts
@@ -16,6 +16,7 @@ exports.getAllPosts = (req, res, next) => {
     return res.status(200).json(posts.rows)
   })
 }
+
 // get all posts by userId
 exports.getAllPostsByUser = (req, res, next) => {
   const id = req.params.id;
@@ -34,39 +35,32 @@ exports.getAllPostsByUser = (req, res, next) => {
 
 // Mark readby
 exports.setReadby = (req, res, next) => {
-  pool.query(`SELECT * FROM users WHERE userid = $1`,
-    [req.auth.userId],
-    (error) => {
-      if (error) {
-        return res.status(401).json({
-          error: error,
-        });
-      }
-      pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
-      [req.params.id],
-      (error, posts) => {
+  pool.query(`SELECT * FROM "posts" WHERE postid = $1`,
+  [req.params.id],
+  (error, posts) => {
+    if (error) {
+      res.status(401).json({
+      error: error,
+      });
+    } 
+    
+    const setReadBy = {
+      readby: req.body.readby,
+      postId: req.params.id
+    }
+    console.log(req.body)
+    pool.query(`UPDATE "posts" SET readby = ARRAY_APPEND (readby, $2) WHERE postid = $1`,
+    [setReadBy.readby, req.params.id],
+      error => {
         if (error) {
-          res.status(401).json({
-          error: error,
-          });
-        } 
-        
-        const setReadBy = {
-          readby: req.auth.userId,
+          throw error
         }
-        console.log(req.body)
-        pool.query(`UPDATE "posts" SET readby= $2 WHERE postid = $1`,
-        [setReadBy.readby, req.params.id],
-          error => {
-            if (error) {
-              throw error
-            }
-          })
-        console.log('post has been read')
-        return res.status(200).json(posts)      
       })
+    console.log('post has been read')
+    return res.status(200).json(posts)      
   })
 }
+
 
 
 // CREATE POST
@@ -81,6 +75,7 @@ exports.addPost = (req, res, next) => {
       author: req.body.post.author,
       postText: req.body.post.postText,
       image: url + '/images/' + req.file.filename,
+      // readby: req.body.readby,
       userId: req.auth.userId
     }
     pool.query(
@@ -92,7 +87,7 @@ exports.addPost = (req, res, next) => {
          error: error,
         });
        }
-      pool.query(`INSERT INTO "posts"(title, author, posttext, image, userId ) VALUES ($1, $2, $3, $4, $5)`,
+      pool.query(`INSERT INTO "posts"(title, author, posttext, image, readby, userId ) VALUES ($1, $2, $3, $4, $5)`,
         [post.title, post.author, post.postText, post.image, req.auth.userId], 
         error => {
           if (error) {
@@ -112,6 +107,7 @@ exports.addPost = (req, res, next) => {
       title: req.body.title,
       author: req.body.author,
       postText: req.body.postText,
+      // readby: req.body.readby,
       userId: req.auth.userId 
     }
     console.log('Jalepeno')
